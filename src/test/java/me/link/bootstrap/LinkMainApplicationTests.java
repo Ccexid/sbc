@@ -1,10 +1,10 @@
-package me.link.sbc;
+package me.link.bootstrap;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class SbcApplicationTests {
+class LinkMainApplicationTests {
 
     @Test
     void contextLoads() {

@@ -1,22 +1,73 @@
 spring:
   application:
     name: top-link-mall
+
+  # 1. 数据库配置 (前期使用 H2 内存库，无需安装数据库即可启动)
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:top_link_db;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+  h2:
+    console:
+      enabled: true # 开启 H2 控制台，启动后访问 /h2-console 即可查看表
+      path: /h2-console
+
+  # 2. Jackson 增强配置 (结合之前的安全加固)
   jackson:
     serialization:
       write-dates-as-timestamps: false
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
-server:
-  port: 48080
+
+  # 3. Redisson 配置 (关键：代替原生 Redis 配置)
+  # 注意：redisson-spring-boot-starter 会自动读取 spring.data.redis 路径
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      database: 0
+      # timeout: 3000ms
+      # password:
+
+# 4. Sa-Token 配置 (优化多租户 Session 共享策略)
 sa-token:
+  token-name: tikToken
+  timeout: 604800 # 7天
+  active-timeout: 3600 # 1小时
+  is-concurrent: false # 不允许多地登录
+  is-share: false
   is-log: true
   token-style: tik
-  is-share: false
-  # Token validity period (unit: seconds) is set to 7 days
-  timeout: 604800
-  # Token minimum activity frequency (unit: seconds).
-  # If there is no access for more than this period of time, it will be frozen. Set it to 1 hour.
-  active-timeout: 3600
-  # Is it allowed for the same account to log in simultaneously from multiple locations?
-  is-concurrent: false
-  token-name: tikToken
+  # 开启持久化令牌，配合 Redisson 存储
+  is-read-cookie: true
+  is-read-header: true
+  # 解决跨域与多租户隔离的 Cookie 路径（如有需要）
+  # cookie:
+  #   domain: localhost
+
+# 5. MyBatis-Plus 配置 (为多租户逻辑预留)
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true # 开启驼峰命名转换
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl # 开发环境下打印 SQL
+  global-config:
+    db-config:
+      logic-delete-field: deleted # 逻辑删除字段
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+server:
+  port: 48080
+  # 配合之前修复的 Tomcat 漏洞，可在此配置连接器安全参数
+  tomcat:
+    uri-encoding: UTF-8
+    accept-count: 100
+    threads:
+      max: 200
+
+# 7. 日志配置 (结合之前修复的 Logback 漏洞)
+logging:
+  level:
+    root: info
+    me.link.bootstrap: debug # 打印你自己业务包下的调试日志
