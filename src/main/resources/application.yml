@@ -81,27 +81,25 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
     enabled: true
+    # 接口排序按方法名（GET/POST等）
     operations-sorter: method
+    # 标签排序按字母
     tags-sorter: alpha
-  # 自动扫描的包路径
-  packages-to-scan: me.link.bootstrap  # 直接指定扫描包（优先级高于 group-configs）
-  paths-to-match: /**  # 扫描所有接口路径
+  # 将对象参数平铺（重要：否则 PageReqVO 会变成 JSON 字符串显示在 URL 参数位置）
   default-flat-param-object: true
 
 knife4j:
   enable: true
   setting:
-    # 开启侧边栏搜索
     enableSearch: true
-    # 开启中间显示地址栏
     enableOpenApi: true
-    # 开启请求参数缓存（刷新页面不丢失 Header）
-    enableFooterCustom: true
+    # 自动刷新 Swagger 列表
+    enableSwaggerModels: true
+    # 开启请求参数缓存（非常重要：这样你填写的 X-Tenant-Id 和 Token 刷新页面后还在）
+    enableRequestCache: true
+    # 是否在文档页显示参数的类型
     footerCustomContent: "Copyright © 2026 Link Bootstrap"
-  documents:
-    - group: System API
-      name: 系统接口文档
-      locations: classpath:markdown/
+    enable-dynamic-parameter: true
 app:
   idempotent:
     salt: LinkStart_2026
