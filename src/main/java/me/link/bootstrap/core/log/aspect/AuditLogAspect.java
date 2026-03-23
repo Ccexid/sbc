@@ -11,15 +11,13 @@ import me.link.bootstrap.core.tenant.TenantContextHolder;
 import me.link.bootstrap.core.utils.BeanDiffUtils;
 import me.link.bootstrap.core.utils.SpELUtils;
 import me.link.bootstrap.core.utils.SystemClock;
+import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.context.ApplicationContext;
-import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
-import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
@@ -142,20 +140,21 @@ public class AuditLogAspect {
         auditLogExecutor.execute(() -> {
             try {
                 // 计算耗时 (毫秒)
-                long costTimeMs = (SystemClock.now() - start) / 1_000;
+                long costTimeMs = (SystemClock.now() - start);
 
                 // 执行数据差异对比 (仅在开启 Diff 且新旧数据均存在时)
                 List<FieldChangeDetail> changes = (anno.isDiff() && oldD != null && newD != null)
                         ? BeanDiffUtils.diff(oldD, newD)
                         : null;
+                String tenantId= TenantContextHolder.getTenantId();
 
                 // 构建日志数据传输对象 (DTO)
                 AuditLogDTO logDTO = AuditLogDTO.builder()
-                        .tenantId(TenantContextHolder.getTenantId()) // 填充租户上下文
+                        .tenantId(StringUtils.isEmpty(tenantId) ? "0" : tenantId) // 填充租户上下文
                         .module(anno.module())                       // 模块名称
                         .operation(op)                               // 操作描述
                         .businessId(bId)                             // 业务主键
-                        .costTime(costTimeMs + "ms")                 // 执行耗时
+                        .costTime(String.valueOf(costTimeMs))                 // 执行耗时
                         .status(e == null ? "SUCCESS" : "FAIL")      // 执行状态
                         .errorMsg(e != null ? e.getMessage() : null) // 异常信息
                         .changes(changes)                            // 字段变更详情

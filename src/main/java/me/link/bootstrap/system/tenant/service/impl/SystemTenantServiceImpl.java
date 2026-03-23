@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDateTime;
+
 /**
  * 租户服务实现类
  */
@@ -42,8 +44,14 @@ public class SystemTenantServiceImpl extends ServiceImpl<SystemTenantMapper, Sys
     @Override
     public void checkTenantValid(Long id) {
         SystemTenant tenant = getById(id);
-        if (tenant == null || tenant.getStatus() != 0) {
-            throw BusinessExceptionUtil.exception(ErrorCode.FORBIDDEN, "租户无效或已停用");
+        if (tenant == null) {
+            throw BusinessExceptionUtil.exception(ErrorCode.TENANT_NOT_FOUND);
+        }
+        if (tenant.getStatus() != 0) {
+            throw BusinessExceptionUtil.exception(ErrorCode.TENANT_FORBIDDEN);
+        }
+        if (tenant.getExpireTime() != null && LocalDateTime.now().isAfter(tenant.getExpireTime())) {
+            throw BusinessExceptionUtil.exception(ErrorCode.TENANT_EXPIRED);
         }
     }
 

@@ -33,6 +33,9 @@ public class MybatisPlusHandler implements MetaObjectHandler {
         if (tenantId != null) {
             // 只有当实体类中有 tenantId 字段且当前值为空时才填充
             this.strictInsertFill(metaObject, "tenantId", Long.class, Long.valueOf(tenantId));
+        } else {
+            // 如果是白名单接口，tenantId 为空，这里可以填 0L 代表系统
+            this.strictInsertFill(metaObject, "tenantId", Long.class, 0L);
         }
     }
 
