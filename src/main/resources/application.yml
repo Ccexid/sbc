@@ -75,7 +75,33 @@ logging:
   level:
     root: info
     me.link.bootstrap: debug # 打印你自己业务包下的调试日志
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    operations-sorter: method
+    tags-sorter: alpha
+  # 自动扫描的包路径
+  packages-to-scan: me.link.bootstrap  # 直接指定扫描包（优先级高于 group-configs）
+  paths-to-match: /**  # 扫描所有接口路径
+  default-flat-param-object: true
 
+knife4j:
+  enable: true
+  setting:
+    # 开启侧边栏搜索
+    enableSearch: true
+    # 开启中间显示地址栏
+    enableOpenApi: true
+    # 开启请求参数缓存（刷新页面不丢失 Header）
+    enableFooterCustom: true
+    footerCustomContent: "Copyright © 2026 Link Bootstrap"
+  documents:
+    - group: System API
+      name: 系统接口文档
+      locations: classpath:markdown/
 app:
   idempotent:
     salt: LinkStart_2026

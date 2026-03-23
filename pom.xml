@@ -20,7 +20,7 @@
         <mybatis-plus.version>3.5.10.1</mybatis-plus.version>
         <redisson.version>3.44.0</redisson.version>
         <mapstruct.version>1.6.3</mapstruct.version>
-        <knife4j.version>4.5.0</knife4j.version>
+        <knife4j.version>4.6.0</knife4j.version>
         <hutool.version>5.8.40</hutool.version>
         <assertj.version>3.27.7</assertj.version>
         <tomcat.version>10.1.52</tomcat.version>
@@ -101,7 +101,7 @@
             <version>${hutool.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.github.xiaoymin</groupId>
+            <groupId>com.github.xingfudeshi</groupId>
             <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
             <version>${knife4j.version}</version>
         </dependency>

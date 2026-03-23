@@ -1,7 +1,6 @@
-package me.link.bootstrap.controller;
+package me.link.bootstrap.system.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import me.link.bootstrap.core.common.Result;
@@ -11,7 +10,6 @@ import me.link.bootstrap.core.lock.annotation.Lock;
 import me.link.bootstrap.core.log.annotation.Log;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -20,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @Tag(name = "基础服务", description = "幂等性管理")
 @RestController
-@RequestMapping("/v1/idempotent-tokens") // 建议增加版本号，资源名称使用复数
+@RequestMapping(value = "/v1/idempotent-tokens", produces = "application/json") // 建议增加版本号，资源名称使用复数
 @RequiredArgsConstructor // 使用构造器注入代替 @Autowired
 public class IdempotentController {
 
