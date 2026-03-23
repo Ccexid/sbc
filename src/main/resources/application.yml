@@ -28,11 +28,11 @@ spring:
   # 注意：redisson-spring-boot-starter 会自动读取 spring.data.redis 路径
   data:
     redis:
-      host: 127.0.0.1
+      host: 192.168.0.245
       port: 6379
-      database: 0
+      database: 11
       # timeout: 3000ms
-      # password:
+      password: redis_FtTapD
 
 # 4. Sa-Token 配置 (优化多租户 Session 共享策略)
 sa-token:
@@ -75,3 +75,7 @@ logging:
   level:
     root: info
     me.link.bootstrap: debug # 打印你自己业务包下的调试日志
+
+app:
+  idempotent:
+    salt: LinkStart_2026

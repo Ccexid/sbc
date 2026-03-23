@@ -1,14 +1,17 @@
 package me.link.bootstrap.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import me.link.bootstrap.core.common.Result;
+import me.link.bootstrap.core.idempotent.annotation.Idempotent;
 import me.link.bootstrap.core.idempotent.service.IdempotentService;
 import me.link.bootstrap.core.lock.annotation.Lock;
 import me.link.bootstrap.core.log.annotation.Log;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -36,5 +39,22 @@ public class IdempotentController {
         // 调用优化后的 Service，内部已包含多租户隔离逻辑
         String token = idempotentService.createToken();
         return Result.success(token);
+    }
+
+    /**
+     * 校验令牌有效性 (POST)
+     * 为什么用 POST：Token 属于敏感信息，不建议放在 URL 参数中(GET)，防止日志泄露。
+     * * @param token 完整 Token (uuid.signature)
+     *
+     * @return true: 有效且未被使用; false: 无效或已过期
+     */
+    @Operation(summary = "校验幂等令牌", description = "手动检查 Token 是否有效，注意：此操作不会消耗(删除) Token")
+    @PostMapping("/verify")
+    @Log(module = "idempotent", operation = "校验幂等令牌")
+    @Lock(key = "idempotent:token:verify")
+    @Idempotent
+    public Result<Boolean> verifyToken() {
+        // 调用 Service 层的校验逻辑
+        return Result.success(true);
     }
 }

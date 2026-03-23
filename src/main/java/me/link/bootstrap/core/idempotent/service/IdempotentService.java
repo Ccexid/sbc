@@ -3,6 +3,8 @@ package me.link.bootstrap.core.idempotent.service;
 import lombok.RequiredArgsConstructor;
 import me.link.bootstrap.core.tenant.TenantContextHolder;
 import me.link.bootstrap.core.utils.CacheUtils;
+import me.link.bootstrap.core.utils.IdempotentSignUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -14,20 +16,23 @@ public class IdempotentService {
 
     private static final String TOKEN_PREFIX = "idempotent:token:";
 
-    /**
-     * 创建幂等 Token
-     * 格式: idempotent:token:{tenantId}:{uuid}
-     */
+    @Value("${app.idempotent.salt:LinkStart_2026}") // 建议配置文件注入，保持私密
+    private String salt;
+
     public String createToken() {
         String tenantId = TenantContextHolder.getTenantId();
         String uuid = UUID.randomUUID().toString().replace("-", "");
 
-        // 构建带租户隔离的 Key
+        // 1. 对 (UUID + 租户ID) 进行加签
+        String signature = IdempotentSignUtils.sign(uuid + tenantId, salt);
+
+        // 2. 组合成对外公开的 Token: uuid.signature
+        String publicToken = uuid + "." + signature;
+
+        // 3. Redis Key 只存 UUID 部分，减少存储压力
         String redisKey = TOKEN_PREFIX + tenantId + ":" + uuid;
+        CacheUtils.set(redisKey, "1", Duration.ofHours(1));
 
-        // 存入 Redis，设置 1 小时有效期
-        CacheUtils.set(redisKey, uuid, Duration.ofHours(1));
-
-        return uuid; // 返回给前端的只需 uuid 部分
+        return publicToken;
     }
 }
