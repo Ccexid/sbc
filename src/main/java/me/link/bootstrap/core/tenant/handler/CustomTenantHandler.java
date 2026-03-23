@@ -39,6 +39,10 @@ public class CustomTenantHandler implements TenantLineHandler {
     @Override
     public boolean ignoreTable(String tableName) {
         // 这里可以配置哪些表永远不需要租户过滤（如系统公共表）
+        // 如果上下文中标记了忽略，则告诉 MP 忽略所有表
+        if (TenantContextHolder.isIgnore()) {
+            return true;
+        }
         return false;
     }
 }
