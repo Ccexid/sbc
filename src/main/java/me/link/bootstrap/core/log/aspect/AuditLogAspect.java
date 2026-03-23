@@ -9,7 +9,7 @@ import me.link.bootstrap.core.log.model.FieldChangeDetail;
 import me.link.bootstrap.core.log.spi.AuditLogStorageProvider;
 import me.link.bootstrap.core.tenant.TenantContextHolder;
 import me.link.bootstrap.core.utils.BeanDiffUtils;
-import me.link.bootstrap.core.utils.SpelUtils;
+import me.link.bootstrap.core.utils.SpELUtils;
 import me.link.bootstrap.core.utils.SystemClock;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -61,7 +61,7 @@ public class AuditLogAspect {
     @Around("@annotation(auditLog)")
     public Object doAround(ProceedingJoinPoint joinPoint, Log auditLog) throws Throwable {
         // 步骤 1: 初始解析 BusinessId (主要依赖方法入参)
-        String businessId = parseSpel(joinPoint, auditLog.businessId(), null);
+        String businessId = parseSpEL(joinPoint, auditLog.businessId(), null);
         long startNano = SystemClock.now();
 
         // 步骤 2: 获取执行前的数据快照 (旧数据)
@@ -76,7 +76,7 @@ public class AuditLogAspect {
             // 异常处理分支：
             // 业务执行失败，仅需记录失败状态。此时没有新数据，但需要保留旧数据以便追溯。
             // 注意：此时无法引用 #result，因此解析 operation 时传入 null
-            String op = parseSpel(joinPoint, auditLog.operation(), null);
+            String op = parseSpEL(joinPoint, auditLog.operation(), null);
             asyncSave(auditLog, op, businessId, oldData, null, startNano, e);
             throw e;
         }
@@ -84,7 +84,7 @@ public class AuditLogAspect {
         // 步骤 4: 二次解析 BusinessId
         // 作用：处理“新增”场景。新增时入参往往没有 ID，需等待业务执行完后，从返回值 (#result) 中获取生成的 ID
         if ("N/A".equals(businessId) || businessId.isBlank()) {
-            businessId = parseSpel(joinPoint, auditLog.businessId(), result);
+            businessId = parseSpEL(joinPoint, auditLog.businessId(), result);
         }
 
         // 步骤 5: 获取执行后的数据快照 (新数据)
@@ -93,7 +93,7 @@ public class AuditLogAspect {
 
         // 步骤 6: 动态解析操作描述 (Operation)
         // 作用：支持在注解中使用 SpEL 引用返回值 (如 #result.name)，生成更人性化的操作描述
-        String dynamicOp = parseSpel(joinPoint, auditLog.operation(), result);
+        String dynamicOp = parseSpEL(joinPoint, auditLog.operation(), result);
 
         // 步骤 7: 异步构建并保存审计日志
         // 作用：将耗时、状态、变更详情等信息封装，通过线程池异步写入，避免影响主接口响应速度
@@ -183,12 +183,12 @@ public class AuditLogAspect {
      * @param result 方法执行后的返回值
      * @return 解析后的字符串值；若解析失败或表达式为空，返回 "N/A" 或原字符串
      */
-    private String parseSpel(ProceedingJoinPoint joinPoint, String spel, Object result) {
+    private String parseSpEL(ProceedingJoinPoint joinPoint, String spel, Object result) {
         if (spel == null || spel.isBlank()) return "N/A";
 
         // 使用工具类，传入可选的 #result 变量
         Map<String, Object> variables = result != null ? Map.of("result", result) : null;
-        String value = SpelUtils.parse(joinPoint, spel, variables);
+        String value = SpELUtils.parse(joinPoint, spel, variables);
 
         return value.isEmpty() ? "N/A" : value;
     }

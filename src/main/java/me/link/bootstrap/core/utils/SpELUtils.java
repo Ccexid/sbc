@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * 高性能 SpEL 表达式解析工具类 (带 Expression 缓存)
  */
-public class SpelUtils {
+public class SpELUtils {
 
     /**
      * 表达式解析器实例 (线程安全)

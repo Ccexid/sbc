@@ -5,17 +5,14 @@ import lombok.extern.slf4j.Slf4j;
 import me.link.bootstrap.core.exception.BusinessException;
 import me.link.bootstrap.core.exception.ErrorCode;
 import me.link.bootstrap.core.lock.annotation.Lock;
-import me.link.bootstrap.core.utils.SpelUtils;
+import me.link.bootstrap.core.utils.SpELUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.reflect.MethodSignature;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
-import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
-import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Component;
 
 @Aspect
@@ -62,6 +59,6 @@ public class LockAspect {
         if (!keySpel.contains("#")) return keySpel;
 
         // 调用工具类解析，无需额外变量
-        return SpelUtils.parse(joinPoint, keySpel, null);
+        return SpELUtils.parse(joinPoint, keySpel, null);
     }
 }
