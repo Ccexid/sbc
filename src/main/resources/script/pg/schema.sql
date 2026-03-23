@@ -28,6 +28,7 @@ CREATE TABLE "sys_tenant"
     "status"        smallint  DEFAULT 0,
     "expire_time"   timestamp,
     "create_time"   timestamp DEFAULT CURRENT_TIMESTAMP,
+    "update_time"  timestamp DEFAULT CURRENT_TIMESTAMP
     PRIMARY KEY ("id")
 );
 CREATE INDEX "idx_tenant_parent_id" ON "sys_tenant" ("parent_id");

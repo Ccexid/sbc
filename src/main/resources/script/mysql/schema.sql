@@ -8,7 +8,7 @@ CREATE TABLE `sys_tenant_package`
     `remark`       varchar(500) DEFAULT NULL COMMENT '备注',
     `create_by`    varchar(64)  DEFAULT '' COMMENT '创建者',
     `create_time`  datetime     DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `update_time`  datetime     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `update_time`  datetime     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='租户套餐表';
 
@@ -19,13 +19,16 @@ CREATE TABLE `sys_tenant`
     `parent_id`     bigint       DEFAULT '0' COMMENT '上级租户 ID (S 指向 P, B 指向 S)',
     `package_id`    bigint       DEFAULT NULL COMMENT '关联套餐 ID',
     `tenant_name`   varchar(50) NOT NULL COMMENT '租户名称',
-    `tenant_type`   varchar(10) NOT NULL COMMENT '租户类型：P(平台), S(服务商), B(商家)',
+    `tenant_type`   varchar(10) NOT NULL COMMENT '租户类型：P(平台),
+    S(服务商),
+    B(商家)',
     `tenant_path`   varchar(255) DEFAULT NULL COMMENT '租户链路溯源 (例如：0,1,10,105)',
     `contact_user`  varchar(20)  DEFAULT NULL COMMENT '联系人',
     `contact_phone` varchar(11)  DEFAULT NULL COMMENT '联系电话',
     `status`        tinyint      DEFAULT '0' COMMENT '租户状态（0 正常 1 停用）',
     `expire_time`   datetime     DEFAULT NULL COMMENT '过期时间',
     `create_time`   datetime     DEFAULT CURRENT_TIMESTAMP,
+    `update_time`   datetime    NOT NULL COMMENT '更新时间',
     PRIMARY KEY (`id`),
     KEY             `idx_parent_id` (`parent_id`),
     KEY             `idx_tenant_path` (`tenant_path`)
@@ -43,7 +46,9 @@ CREATE TABLE `sys_menu`
     `perms`       varchar(100) DEFAULT NULL COMMENT '权限标识 (sys:user:add)',
     `menu_type`   char(1)      DEFAULT '' COMMENT '类型（M 目录 C 菜单 F 按钮）',
     `icon`        varchar(100) DEFAULT '#' COMMENT '图标',
-    `tenant_type` varchar(10)  DEFAULT 'ALL' COMMENT '适用对象：P,S,B 或 ALL',
+    `tenant_type` varchar(10)  DEFAULT 'ALL' COMMENT '适用对象：P,
+    S,
+    B              或 ALL',
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='菜单权限表';
 
@@ -124,7 +129,8 @@ CREATE TABLE `audit_log`
     `business_id` varchar(64)  NOT NULL DEFAULT '' COMMENT '业务主键/关联 ID',
     `operator`    varchar(64)  NOT NULL DEFAULT '' COMMENT '操作人账号',
     `cost_time`   int unsigned    DEFAULT '0' COMMENT '耗时 (毫秒)',
-    `status`      varchar(20)  NOT NULL DEFAULT 'SUCCESS' COMMENT '状态：SUCCESS, FAIL',
+    `status`      varchar(20)  NOT NULL DEFAULT 'SUCCESS' COMMENT '状态：SUCCESS,
+    FAIL',
     `error_msg`   text COMMENT '异常堆栈信息',
     `changes`     json                  DEFAULT NULL COMMENT '变更明细 (MySQL 8.0 JSON 类型)',
     `create_time` datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',

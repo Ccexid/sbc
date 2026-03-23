@@ -16,6 +16,7 @@ public enum ErrorCode implements IErrorCode {
     SYSTEM_ERROR(1001000001L, "系统繁忙，请稍后再试"),
     PARAM_ERROR(1001000002L, "参数校验失败"),
     REPEATED_REQUESTS(1001000003L, "请求过于频繁"),
+    BAD_REQUEST(1001000004L, "请求参数错误"),
 
     // --- 1-001-100-xxx 认证权限异常 ---
     UNAUTHORIZED(1001100001L, "暂未登录或Token已过期"),

@@ -22,7 +22,8 @@ CREATE TABLE IF NOT EXISTS sys_tenant (
     contact_phone VARCHAR(11),
     status SMALLINT DEFAULT 0,
     expire_time TIMESTAMP,
-    create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX idx_tenant_parent_id ON sys_tenant (parent_id);
 CREATE INDEX idx_tenant_path ON sys_tenant (tenant_path);
