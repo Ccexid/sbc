@@ -87,6 +87,13 @@ springdoc:
     tags-sorter: alpha
   # 将对象参数平铺（重要：否则 PageReqVO 会变成 JSON 字符串显示在 URL 参数位置）
   default-flat-param-object: true
+  group-configs:
+    - group: 系统模块
+      packages-to-scan: me.link.bootstrap.system.controller
+      paths-to-match: /system/**
+    - group: 业务模块
+      packages-to-scan: me.link.bootstrap.business.controller
+      paths-to-match: /v1/**
 
 knife4j:
   enable: true
