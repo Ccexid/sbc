@@ -1,0 +1,46 @@
+# 核心构建产物（仅忽略根目录）
+/target/
+/dist/
+/nbdist/
+
+# Maven Wrapper 忽略（原规则保留）
+.mvn/wrapper/maven-wrapper.jar
+
+### IDE 配置 ###
+# STS
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+# IntelliJ IDEA
+.idea
+*.iws
+*.iml
+*.ipr
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/.nb-gradle/
+/build/
+
+# VS Code
+.vscode/
+
+### 通用忽略 ###
+# 操作系统临时文件
+.DS_Store
+Thumbs.db
+*.swp
+*.tmp
+*.bak
+
+# Maven 日志/临时文件
+*.log
+maven-status/
+
+# 冗余规则已删除（src/main/src/test 下无 target/build，无需否定）
