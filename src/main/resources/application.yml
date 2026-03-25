@@ -1,3 +1,85 @@
+server:
+  port: 48080
+  servlet:
+    context-path: /
+    encoding:
+      charset: UTF-8
+
 spring:
   application:
     name: top-link-mall
+
+  # 1. H2 内存数据库配置
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: org.h2.Driver
+    # mem:testdb 表示内存模式，DB_CLOSE_DELAY=-1 确保最后一个连接断开时数据库不销毁
+    url: jdbc:h2:mem:link_db;MODE=MySQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+
+  # 2. H2 Console 配置 (方便在浏览器直接查看内存数据)
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        trace: false
+        web-allow-others: false
+
+  # 3. Redis 配置 (匹配 pom 中的 redisson 依赖)
+  data:
+    redis:
+      host: 192.168.0.245
+      port: 6379
+      database: 11
+      timeout: 5000
+      password: redis_FtTapD
+
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+# 4. MyBatis Plus 增强配置
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  type-aliases-package: me.link.**.domain
+  global-config:
+    db-config:
+      id-type: auto # 内存数据库建议自增
+      logic-delete-field: deleted # 逻辑删除
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl # 开发环境日志
+    map-underscore-to-camel-case: true
+    cache-enabled: false
+
+# 5. Sa-Token 优化配置 (与 pom 对应)
+sa-token:
+  token-name: tikToken
+  timeout: 3600 # token有效期，单位s (1小时)
+  active-timeout: 1800 # 临时有效期 (30分钟无操作剔除)
+  is-concurrent: false # 是否允许同一账号并发登录
+  is-share: false # 在多人登录同一账号时，是否共用一个token
+  token-style: tik
+  is-log: true
+  jwt-secret-key: link-platform-secret-key-2026 # 使用了 sa-token-jwt 建议配置
+  is-read-header: true
+  is-read-cookie: true
+  is-color-log: true
+
+# 6. Knife4j / SpringDoc 增强配置
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
