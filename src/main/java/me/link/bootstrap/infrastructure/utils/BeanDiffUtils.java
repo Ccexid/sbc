@@ -4,6 +4,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.ReflectUtil;
 import lombok.extern.slf4j.Slf4j;
+import me.link.bootstrap.domain.log.model.FieldChangeDetail;
 import me.link.bootstrap.infrastructure.annotation.LogField;
 import org.apache.commons.lang3.StringUtils;
 
@@ -24,70 +25,58 @@ public class BeanDiffUtils {
     private static final Map<Class<?>, Field[]> FIELDS_CACHE = new ConcurrentHashMap<>();
 
     /**
-     * 比较两个对象之间的差异
+     * 比较两个对象之间的差异 (DDD 模式优化版)
      *
      * @param oldObj 旧对象
      * @param newObj 新对象
-     * @return 包含差异详情的列表，每个元素是一个 Map，包含字段名、字段标签、修改前后的值
+     * @return 包含 FieldChangeDetail 的列表，类型安全且易于序列化
      */
-    public static List<Map<String, Object>> diff(Object oldObj, Object newObj) {
-        // 步骤 1: 空值检查
-        // 如果任一对象为 null，无法进行比较，直接返回空列表
-        if (oldObj == null || newObj == null) {
+    public static List<FieldChangeDetail> diff(Object oldObj, Object newObj) {
+        // 1. 前置检查：空值或类型不匹配直接返回空列表
+        if (oldObj == null || newObj == null || !oldObj.getClass().equals(newObj.getClass())) {
+            if (oldObj != null && newObj != null) {
+                log.warn("BeanDiffUtils: Types mismatch [{} vs {}]", oldObj.getClass(), newObj.getClass());
+            }
             return Collections.emptyList();
         }
 
-        // 步骤 2: 类型一致性检查
-        // 确保两个对象的类类型完全一致，否则记录警告并返回空列表
-        if (!oldObj.getClass().equals(newObj.getClass())) {
-            log.warn("BeanDiffUtils: Objects to compare have different types.");
-            return Collections.emptyList();
-        }
-
-        // 步骤 3: 初始化结果列表
-        List<Map<String, Object>> changeDetails = new ArrayList<>();
-
-        // 步骤 4: 获取字段列表（带缓存机制）
-        // 从缓存中获取该类的字段数组，若不存在则通过反射获取并存入缓存
+        // 2. 获取缓存的字段列表
+        // 使用 FIELDS_CACHE 避免高频操作下的反射性能损耗
         Field[] fields = FIELDS_CACHE.computeIfAbsent(oldObj.getClass(), ReflectUtil::getFields);
+        List<FieldChangeDetail> changeDetails = new ArrayList<>();
 
-        // 步骤 5: 遍历所有字段进行对比
         for (Field field : fields) {
-            // 获取字段上的 @LogField 注解
+            // 3. 仅处理带有 @LogField 注解的字段
             LogField logField = field.getAnnotation(LogField.class);
-            
-            // 如果字段没有 @LogField 注解，说明不需要记录日志，跳过该字段
             if (logField == null) {
                 continue;
             }
 
             try {
-                // 步骤 6: 获取字段值
-                // 使用 Hutool 的反射工具获取旧对象和新对象中该字段的值
+                // 4. 获取字段值
                 Object oldValue = ReflectUtil.getFieldValue(oldObj, field);
                 Object newValue = ReflectUtil.getFieldValue(newObj, field);
 
-                // 步骤 7: 判断值是否发生变化
-                // 使用 Hutool 的 ObjectUtil.notEqual 进行严谨比较（处理基本类型与包装类的差异）
+                // 5. 核心逻辑：判断值是否发生实质性变化
                 if (ObjectUtil.notEqual(oldValue, newValue)) {
-                    // 构建差异详情 Map
-                    Map<String, Object> detail = new HashMap<>(4);
-                    detail.put("fieldLabel", logField.value());       // 放入字段中文标签
-                    detail.put("fieldName", field.getName());         // 放入字段英文名
-                    detail.put("beforeValue", formatValue(oldValue, logField)); // 放入格式化后的旧值
-                    detail.put("afterValue", formatValue(newValue, logField));  // 放入格式化后的新值
 
-                    // 将差异详情添加到结果列表
+                    // 6. 构造领域模型 (FieldChangeDetail)
+                    // 使用我们之前定义的 formatValue 方法进行脱敏、日期格式化和字典翻译
+                    FieldChangeDetail detail = FieldChangeDetail.builder()
+                            .fieldLabel(logField.value())
+                            .fieldName(field.getName())
+                            .beforeValue(formatValue(oldValue, logField))
+                            .afterValue(formatValue(newValue, logField))
+                            .build();
+
                     changeDetails.add(detail);
                 }
             } catch (Exception e) {
-                // 步骤 8: 异常处理
-                // 捕获反射或处理过程中的异常，记录错误日志，避免中断整个比较流程
-                log.error("BeanDiffUtils error comparing field: {}", field.getName(), e);
+                // 局部异常隔离，不影响其他字段的对比
+                log.error("[BeanDiff] 字段 [{}] 对比失败: {}", field.getName(), e.getMessage());
             }
         }
-        
-        // 步骤 9: 返回最终结果
+
         return changeDetails;
     }
 
