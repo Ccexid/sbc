@@ -25,6 +25,10 @@ spring:
       settings:
         trace: false
         web-allow-others: false
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath*:schema.sql
 
   # 3. Redis 配置 (匹配 pom 中的 redisson 依赖)
   data:

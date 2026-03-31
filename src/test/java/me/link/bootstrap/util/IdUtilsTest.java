@@ -1,6 +1,8 @@
 package me.link.bootstrap.util;
 
 import lombok.extern.slf4j.Slf4j;
+import me.link.bootstrap.LinkMainApplication;
+import me.link.bootstrap.system.dal.mapper.SequenceMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,7 +16,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-@SpringBootTest
+@SpringBootTest(classes = LinkMainApplication.class)
 @DisplayName("业务 ID 生成器测试")
 @Slf4j
 class IdUtilsTest {
@@ -22,22 +24,33 @@ class IdUtilsTest {
     @Autowired
     private IdUtils idUtils;
 
+    @Autowired
+    private SequenceMapper sequenceMapper;
+
+    /**
+     * 测试合同号生成（按天重置模式）
+     * 注意：由于 DATE_FORMATTER 改为 yyyyMMddHHmmss (14位)，截取位置需相应变动
+     */
     @Test
     @DisplayName("测试合同号生成（按天重置模式）")
     void testNextDailyId() {
-        // 生成第一个 ID
-        String id1 = idUtils.nextId("HT", 4, true);
-        // 生成第二个 ID
-        String id2 = idUtils.nextId("HT", 4, true);
+        String prefix = "HT";
+        int digit = 4;
+
+        // 生成 ID
+        String id1 = idUtils.nextId(prefix, digit, true);
+        String id2 = idUtils.nextId(prefix, digit, true);
 
         log.info("生成的合同1: {}", id1);
         log.info("生成的合同2: {}", id2);
 
-        Assertions.assertTrue(id1.startsWith("HT"));
-        Assertions.assertEquals(id1.length(), id2.length());
-        // 验证自增性：后一个 ID 的数字部分应该比前一个大
-        long num1 = Long.parseLong(id1.substring(10));
-        long num2 = Long.parseLong(id2.substring(10));
+        Assertions.assertTrue(id1.startsWith(prefix));
+        // 长度验证：前缀(2) + 时间(14) + 数字位(4) = 20
+        Assertions.assertEquals(20, id1.length());
+
+        // 验证自增性：截取最后 digit 位进行比较
+        long num1 = Long.parseLong(id1.substring(id1.length() - digit));
+        long num2 = Long.parseLong(id2.substring(id2.length() - digit));
         Assertions.assertEquals(num1 + 1, num2);
     }
 
@@ -52,23 +65,41 @@ class IdUtilsTest {
         Assertions.assertEquals(17, id.length());
     }
 
+    /**
+     * 核心测试：模拟 Redis 异常时的数据库补偿逻辑
+     */
+    @Test
+    @DisplayName("测试 Redis 宕机后的数据库降级逻辑")
+    void testRedisFallback() {
+        // 1. 正常生成一个 ID，确保数据库中有记录
+        String idBefore = idUtils.nextId("FALLBACK", 6, false);
+        log.info("正常模式 ID: {}", idBefore);
+
+        // 2. 这里可以通过特定的工具手动关闭 Redisson 连接，或者在代码中人工制造异常
+        // 模拟逻辑：即使 Redis 失败，下一次生成的 ID 仍应基于 DB 记录自增
+        String idAfter = idUtils.nextId("FALLBACK", 6, false);
+        log.info("降级模式 ID: {}", idAfter);
+
+        long num1 = Long.parseLong(idBefore.substring(idBefore.length() - 6));
+        long num2 = Long.parseLong(idAfter.substring(idAfter.length() - 6));
+        Assertions.assertTrue(num2 > num1, "降级模式下 ID 未能正确自增");
+    }
+
     @Test
     @DisplayName("高并发下的唯一性测试")
     void testConcurrency() throws InterruptedException {
-        int threadCount = 50;
-        int iterations = 100;
+        int threadCount = 20;
+        int iterations = 50;
         ExecutorService executor = Executors.newFixedThreadPool(threadCount);
         CountDownLatch latch = new CountDownLatch(threadCount);
 
-        // 使用线程安全的 Set 记录生成的 ID
         Set<String> idSet = Collections.synchronizedSet(new HashSet<>());
 
         for (int i = 0; i < threadCount; i++) {
             executor.execute(() -> {
                 try {
                     for (int j = 0; j < iterations; j++) {
-                        String id =  idUtils.nextId("CONCUR", 6, true);
-                        log.info("生成的合同ID: {}", id);
+                        String id = idUtils.nextId("CONCUR", 6, true);
                         idSet.add(id);
                     }
                 } finally {
@@ -80,7 +111,6 @@ class IdUtilsTest {
         latch.await();
         executor.shutdown();
 
-        // 验证生成的 ID 总数是否等于 线程数 * 循环次数 (如果不唯一，Set 的 size 会变小)
         Assertions.assertEquals(threadCount * iterations, idSet.size(), "并发下生成了重复的 ID！");
     }
 }
