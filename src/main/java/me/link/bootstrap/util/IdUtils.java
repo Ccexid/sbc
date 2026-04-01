@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * 分布式 ID 生成工具类，继承自 Hutool 的 IdUtil。
@@ -158,7 +159,7 @@ public class IdUtils extends IdUtil {
         // 3. 格式化输出：构建指定位数的数字字符串（例如 %05d）
         // 如果 digit <= 0，则不补零，直接输出数字
         String suffix = (digit > 0) ? "%0" + digit + "d" : "%d";
-        
+
         // 拼接最终结果
         return isDaily
                 ? "%s%s%s".formatted(prefix, dateStrSeq, suffix.formatted(sequence))
@@ -178,7 +179,7 @@ public class IdUtils extends IdUtil {
         try {
             // 获取 Redis 原子长整型对象
             RAtomicLong atomicLong = redissonClient.getAtomicLong(ctx.key());
-            
+
             // 执行原子自增操作，返回自增后的值
             long sequence = atomicLong.incrementAndGet();
 
@@ -190,17 +191,22 @@ public class IdUtils extends IdUtil {
                 var endOfDay = LocalDateTime.of(LocalDate.now(), LocalTime.MAX)
                         .atZone(ZoneId.systemDefault())
                         .toInstant();
-                
+
                 // 设置过期时间，确保每天的数据自动清理，防止内存无限增长
                 // expire(Instant) 方法会让 Key 在指定时间点失效
                 atomicLong.expire(endOfDay);
             }
+            // 2. 异步同步：建议增加判断，例如每 10 个 ID 同步一次，或者直接异步全量同步
+            // 这样即便 Redis 挂了，DB 里的值也最接近真实值
+            CompletableFuture.runAsync(() -> {
+                try {
+                    long id = IdUtils.getSnowflakeNextId();
+                    sequenceMapper.syncRedisValue(id, ctx.bizName(), sequence);
+                } catch (Exception e) {
+                    log.error("ID 异步同步失败: {}", e.getMessage());
+                }
+            });
             return sequence;
-        } catch (GlobalException e) {
-            // 捕获自定义全局异常（通常包装了 Redis 连接超时等异常）
-            log.error("Redisson 异常，尝试从数据库维护表获取序列：{}", e.getMessage());
-            // 降级：调用数据库序列生成方法
-            return getSequence(ctx.bizName());
         } catch (Exception e) {
             // 捕获其他未预期的异常，同样触发降级
             log.error("Redis 操作发生未知异常，降级至数据库序列：{}", e.getMessage(), e);
@@ -226,18 +232,13 @@ public class IdUtils extends IdUtil {
         try {
             // 生成一个初始序列号，这里使用雪花算法作为基础，避免纯时间戳的重复问题
             long sequence = IdUtils.getSnowflakeNextId();
-            
+
             // 先进行原子操作进行数据更新获取最大序列号
             // upsertAndIncrement 应该保证在数据库层面的原子性（如使用 ON DUPLICATE KEY UPDATE 或 锁）
             sequenceMapper.upsertAndIncrement(sequence, bizName);
-            
+
             // 返回更新后的当前值
             return sequenceMapper.selectCurrentValue(bizName);
-        } catch (GlobalException ex) {
-            // 数据库操作也失败时的最后保底策略
-            log.error("数据库序列生成失败，使用时间戳最后保底！", ex);
-            // 返回当前毫秒数的后 6 位，极度简化，仅保证短时内不完全重复，生产环境需谨慎
-            return System.currentTimeMillis() % 1000000;
         } catch (Exception ex) {
             // 捕获其他数据库异常
             log.error("数据库操作发生未知异常，使用时间戳最后保底！", ex);

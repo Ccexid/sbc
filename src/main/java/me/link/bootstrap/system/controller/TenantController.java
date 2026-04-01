@@ -4,6 +4,7 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import me.link.bootstrap.core.constants.GlobalApiConstants;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(GlobalApiConstants.API_PREFIX + "/system/tenant")
 @Validated
 @RequiredArgsConstructor
+@Tag(name = "租户接口")
 public class TenantController {
     private final TenantService tenantService;
 

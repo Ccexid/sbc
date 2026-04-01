@@ -31,4 +31,23 @@ public interface SequenceMapper extends BaseMapper<SequenceDO> {
      */
     @Select("SELECT current_value FROM system_sequence WHERE biz_code = #{name}")
     Long selectCurrentValue(@Param("name") String name);
+
+
+    /**
+     * 同步 Redis 中的序列值到数据库
+     * <p>
+     * 将 Redis 中缓存的当前序列值同步到数据库，使用 UPSERT 模式：
+     * 如果业务标识不存在则插入新记录；如果已存在则更新 current_value 为两者中的较大值
+     * </p>
+     *
+     * @param name         业务标识
+     * @param currentValue Redis 中缓存的当前序列值
+     * @return 影响行数
+     */
+    @Update("INSERT INTO system_sequence (id, biz_code, current_value, update_time) " +
+            "VALUES (#{id}, #{name}, #{currentValue}, NOW()) " +
+            "ON DUPLICATE KEY UPDATE " +
+            "current_value = GREATEST(current_value, VALUES(current_value)), " +
+            "update_time = NOW()")
+    int syncRedisValue(@Param("id") Long id, @Param("name") String name, @Param("currentValue") Long currentValue);
 }

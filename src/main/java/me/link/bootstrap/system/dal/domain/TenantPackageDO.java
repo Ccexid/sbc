@@ -3,9 +3,11 @@ package me.link.bootstrap.system.dal.domain;
 import com.baomidou.mybatisplus.annotation.*;
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import lombok.*;
+import me.link.bootstrap.core.annotation.IdGenerator;
 import me.link.bootstrap.core.domain.BaseDO;
 import me.link.bootstrap.core.enums.StatusEnum;
 
+import java.io.Serial;
 import java.util.Set;
 
 /**
@@ -18,6 +20,8 @@ import java.util.Set;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 public class TenantPackageDO extends BaseDO {
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /**
      * 套餐编号
