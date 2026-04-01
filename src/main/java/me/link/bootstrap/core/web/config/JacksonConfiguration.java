@@ -1,5 +1,6 @@
 package me.link.bootstrap.core.web.config;
 
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
@@ -20,7 +21,7 @@ public class JacksonConfiguration {
         return builder -> {
             // 1. 显式注册 JSR310 日期模块
             builder.modules(new JavaTimeModule());
-
+            builder.featuresToEnable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING);
             // 2. 解决全栈开发中的 Long 精度丢失问题
             // 将 Long 和 BigInteger 全部序列化为 String 返回给前端
             builder.serializerByType(Long.class, ToStringSerializer.instance);

@@ -14,26 +14,27 @@ spring:
     type: com.zaxxer.hikari.HikariDataSource
     driver-class-name: com.p6spy.engine.spy.P6SpyDriver
     # 使用 file 模式替代 mem，数据保存在项目根目录的 data 文件夹下
-    url: jdbc:p6spy:h2:file:./data/link_db;MODE=MySQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1
-    username: sa
-    password:
+#    url: jdbc:p6spy:h2:file:./data/link_db;MODE=MySQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1
+    url: jdbc:p6spy:mysql://192.168.0.245:3306/7link-pro?useSSL=false&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&transformedBitIsBoolean=true&serverTimezone=GMT%2B8&nullCatalogMeansCurrent=true&allowPublicKeyRetrieval=true
+    username: root
+    password: mysql_5rpkQb
     hikari:
       maximum-pool-size: 10
       minimum-idle: 5
 
   # 2. H2 Console 配置
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
-      settings:
-        trace: false
-        web-allow-others: false
-
-  sql:
-    init:
-      mode: always
-      schema-locations: classpath*:schema.sql
+#  h2:
+#    console:
+#      enabled: true
+#      path: /h2-console
+#      settings:
+#        trace: false
+#        web-allow-others: false
+#
+#  sql:
+#    init:
+#      mode: always
+#      schema-locations: classpath*:schema.sql
       # 建议增加 data-locations 用于初始化字典表数据
       # data-locations: classpath*:data.sql
 
