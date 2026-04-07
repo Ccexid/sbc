@@ -18,7 +18,7 @@ public class SequenceDO {
      * 主键 ID
      * 使用 ASSIGN_ID 策略，由 MyBatis Plus 内置的雪花算法自动生成全局唯一 ID
      */
-    @TableId(type = IdType.ASSIGN_ID)
+    @TableId(type = IdType.AUTO)
     private Long id;
 
     /**

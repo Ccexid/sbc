@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 import static me.link.bootstrap.core.constants.GlobalApiConstants.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
 @Data
-public class BaseDO implements Serializable {
+public abstract class BaseDO implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 

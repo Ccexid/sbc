@@ -7,14 +7,11 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 import me.link.bootstrap.core.domain.BaseDO;
 import me.link.bootstrap.core.enums.StatusEnum;
-import me.link.bootstrap.core.mybatis.handler.StringToListTypeHandler;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Set;
 
 import static me.link.bootstrap.core.constants.GlobalApiConstants.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;

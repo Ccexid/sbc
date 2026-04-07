@@ -7,7 +7,7 @@ import java.io.Serial;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class TenantBaseDO extends BaseDO {
+public abstract class TenantBaseDO extends BaseDO {
     @Serial
     private final static long serialVersionUID = 1L;
 
