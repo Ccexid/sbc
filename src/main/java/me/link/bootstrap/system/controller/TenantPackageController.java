@@ -28,7 +28,15 @@ public class TenantPackageController {
     }
 
     @PatchMapping("/{id}")
-    @Operation(summary = "更新租户套餐")
+    @Operation(summary = "更新租户套餐(局部)")
+    public ResponseEntity<Boolean> patchUpdateTenantPackage(@PathVariable Long id,
+                                                            @RequestBody TenantPackageDO tenantPackage) {
+        tenantPackage.setId(id);
+        return ResponseEntity.ok(tenantPackageService.updateById(tenantPackage));
+    }
+
+    @PostMapping("/{id}")
+    @Operation(summary = "更新租户套餐(全量)")
     public ResponseEntity<Boolean> updateTenantPackage(@PathVariable Long id,
                                                        @RequestBody TenantPackageDO tenantPackage) {
         tenantPackage.setId(id);
