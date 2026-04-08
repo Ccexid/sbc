@@ -33,11 +33,4 @@ public class FieldMaskParam implements Serializable {
                 .map(String::trim)
                 .collect(Collectors.toSet());
     }
-
-    /**
-     * 判定某个字段是否在更新范围内
-     */
-    public boolean contains(String fieldName) {
-        return getMaskSet().contains(fieldName);
-    }
 }
