@@ -1,6 +1,7 @@
 package me.link.bootstrap.core.mybatis.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import me.link.bootstrap.core.domain.BaseDO;
 
 /**
  * 扩展的MyBatis-Plus基础Mapper接口
@@ -12,5 +13,5 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * @param <T> 实体类型
  * @see com.baomidou.mybatisplus.core.mapper.BaseMapper
  */
-public interface BaseMapperX<T> extends BaseMapper<T> {
+public interface BaseMapperX<T extends BaseDO> extends BaseMapper<T> {
 }
