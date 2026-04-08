@@ -1,6 +1,7 @@
 package me.link.bootstrap.system.dal.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import me.link.bootstrap.core.mybatis.mapper.BaseMapperX;
 import me.link.bootstrap.system.dal.domain.SequenceDO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -8,7 +9,7 @@ import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
 @Mapper
-public interface SequenceMapper extends BaseMapper<SequenceDO> {
+public interface SequenceMapper extends BaseMapperX<SequenceDO> {
     /**
      * 原子递增序列值 (核心容灾逻辑)
      * 1. 如果 name 不存在，则插入一条记录，初始值为 1
