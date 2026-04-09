@@ -207,7 +207,7 @@ public class IdGeneratorInterceptor implements Interceptor {
                     IdGenerator idGen = field.getAnnotation(IdGenerator.class);
                     
                     // 调用分布式ID生成器生成唯一ID
-                    String nextId = IdUtils.getNextId(idGen.prefix(), idGen.digit(), idGen.daily());
+                    String nextId = IdUtils.next(idGen.prefix(), idGen.digit(), idGen.daily());
                     
                     // 通过反射设置生成的ID值
                     field.set(entity, nextId);

@@ -17,6 +17,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.concurrent.*;
 
+import static me.link.bootstrap.core.constants.GlobalApiConstants.FORMAT_YEAR_MONTH_DAY_COMPACT;
+import static me.link.bootstrap.core.constants.GlobalApiConstants.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND_COMPACT;
+
 /**
  * 分布式ID生成器 - 工业级号段模式
  * 特性：高并发、零IO阻塞、Redis+DB双容错、内存泄露防护
@@ -28,8 +31,8 @@ public class IdUtils {
 
     private static final long DEFAULT_STEP = 1000;
     private static final String BASE_PREFIX = "id_gen:segment:";
-    private static final DateTimeFormatter DATE_SEQ_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
+    private static final DateTimeFormatter DATE_SEQ_FORMATTER = DateTimeFormatter.ofPattern(FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND_COMPACT);
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern(FORMAT_YEAR_MONTH_DAY_COMPACT);
 
     private final RedissonClient redissonClient;
     private final SequenceMapper sequenceMapper;
@@ -61,7 +64,7 @@ public class IdUtils {
      * 优雅关闭异步加载线程池，防止资源泄露
      */
     @PreDestroy
-    public void destroy() {
+    public void shutdown() {
         log.info("[IdUtils] 开始销毁分布式ID生成器 | 缓存号段数量={}", segmentCache.size());
         loaderExecutor.shutdown();
         try {
@@ -92,7 +95,7 @@ public class IdUtils {
      * @return 生成的分布式唯一ID
      * @throws IllegalStateException 如果IdUtils未正确初始化
      */
-    public static String getNextId(String prefix, int digit, boolean isDaily) {
+    public static String next(String prefix, int digit, boolean isDaily) {
         if (instance == null) {
             log.error("[IdUtils] IdUtils未初始化，无法生成ID | prefix={}, digit={}, isDaily={}", prefix, digit, isDaily);
             throw new IllegalStateException("IdUtils未初始化");
@@ -128,13 +131,13 @@ public class IdUtils {
                 prefix, bizName, digit, isDaily);
 
         // 步骤1：获取可用号段（可能触发同步加载）
-        IdSegment segment = getOrUpdateSegment(bizName);
+        IdSegment segment = obtainSegment(bizName);
         log.debug("[IdUtils] 获取号段成功 | bizName={}, currentValue={}, maxId={}, remaining={}", 
                 bizName, segment.getCurrentValue().get(), segment.getMaxId(), 
                 segment.getMaxId() - segment.getCurrentValue().get());
 
         // 步骤2：异步检测并预加载下一号段（核心优化：避免号段耗尽时的阻塞）
-        checkAndAsyncLoadNext(segment);
+        preheatNextSegment(segment);
 
         // 步骤3：原子自增获取序列值（无锁高性能）
         long seq = segment.getAndIncrement();
@@ -147,7 +150,7 @@ public class IdUtils {
         }
 
         // 步骤5：定时清理过期内存Key（防止内存泄露）
-        cleanExpiredSegments(todayStr);
+        evictExpiredSegments(todayStr);
 
         // 步骤6：格式化组装ID
         String suffix = String.format("%0" + digit + "d", seq);
@@ -166,12 +169,12 @@ public class IdUtils {
      * @param bizName 业务标识
      * @return 可用的号段对象
      */
-    private IdSegment getOrUpdateSegment(String bizName) {
+    private IdSegment obtainSegment(String bizName) {
         IdSegment segment = segmentCache.get(bizName);
         if (segment == null || segment.isExhausted()) {
             log.debug("[IdUtils] 号段不存在或已耗尽，触发同步加载 | bizName={}, exhausted={}", 
                     bizName, segment != null && segment.isExhausted());
-            return synchronizedLoad(bizName);
+            return provision(bizName);
         }
         return segment;
     }
@@ -195,7 +198,7 @@ public class IdUtils {
      * @param bizName 业务标识
      * @return 新加载的号段
      */
-    private IdSegment synchronizedLoad(String bizName) {
+    private IdSegment provision(String bizName) {
         String lockKey = BASE_PREFIX + bizName + ":lock";
         RLock lock = redissonClient.getLock(lockKey);
         try {
@@ -203,7 +206,7 @@ public class IdUtils {
             boolean locked = lock.tryLock(3, 10, TimeUnit.SECONDS);
             if (!locked) {
                 log.warn("[IdUtils] 获取分布式锁超时，执行DB降级 | bizName={}, lockKey={}", bizName, lockKey);
-                return dbFallback(bizName);
+                return fallback(bizName);
             }
 
             log.debug("[IdUtils] 获取分布式锁成功，开始加载号段 | bizName={}", bizName);
@@ -256,7 +259,7 @@ public class IdUtils {
         } catch (InterruptedException e) {
             log.error("[IdUtils] 获取分布式锁被中断 | bizName={}", bizName, e);
             Thread.currentThread().interrupt();
-            return dbFallback(bizName);
+            return fallback(bizName);
         } catch (Exception e) {
             log.error("[IdUtils] 号段加载失败，执行DB降级 | bizName={}, error={}", 
                     bizName, e.getMessage(), e);
@@ -269,7 +272,7 @@ public class IdUtils {
         }
         
         // 降级方案：直接从数据库分配
-        return dbFallback(bizName);
+        return fallback(bizName);
     }
 
     /**
@@ -284,7 +287,7 @@ public class IdUtils {
      *
      * @param segment 当前使用的号段
      */
-    private void checkAndAsyncLoadNext(IdSegment segment) {
+    private void preheatNextSegment(IdSegment segment) {
         // 检查是否达到预加载阈值（剩余量 < 20%）且没有正在进行的加载任务
         if (segment.isThresholdReached() && !segment.isLoading()) {
             log.debug("[IdUtils] 号段达到预加载阈值，触发异步加载 | bizName={}, currentValue={}, maxId={}, threshold=20%", 
@@ -299,7 +302,7 @@ public class IdUtils {
                     loaderExecutor.execute(() -> {
                         try {
                             log.debug("[IdUtils] 开始异步加载下一号段 | bizName={}", segment.getBizName());
-                            synchronizedLoad(segment.getBizName());
+                            provision(segment.getBizName());
                             log.debug("[IdUtils] 异步加载下一号段完成 | bizName={}", segment.getBizName());
                         } catch (Exception e) {
                             log.error("[IdUtils] 异步加载下一号段失败 | bizName={}", segment.getBizName(), e);
@@ -326,7 +329,7 @@ public class IdUtils {
      * @param bizName 业务标识
      * @return 单ID号段（step=1）
      */
-    private IdSegment dbFallback(String bizName) {
+    private IdSegment fallback(String bizName) {
         log.warn("[IdUtils] 执行DB降级分配ID | bizName={}", bizName);
         try {
             // 数据库原子递增
@@ -353,7 +356,7 @@ public class IdUtils {
      *
      * @param todayStr 今天的日期字符串（yyyyMMdd格式）
      */
-    private void cleanExpiredSegments(String todayStr) {
+    private void evictExpiredSegments(String todayStr) {
         // 当缓存过大时触发清理（阈值：50个条目）
         if (segmentCache.size() > 50) {
             int beforeSize = segmentCache.size();
