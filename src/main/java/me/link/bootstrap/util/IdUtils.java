@@ -1,6 +1,5 @@
 package me.link.bootstrap.util;
 
-import cn.hutool.core.util.StrUtil;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
@@ -133,7 +132,7 @@ public class IdUtils {
         // 步骤1：获取可用号段（可能触发同步加载）
         IdSegment segment = obtainSegment(bizName);
         log.debug("[IdUtils] 获取号段成功 | bizName={}, currentValue={}, maxId={}, remaining={}", 
-                bizName, segment.getCurrentValue().get(), segment.getMaxId(), 
+                bizName, segment.getCurrentValue().get(), segment.getMaxId(),
                 segment.getMaxId() - segment.getCurrentValue().get());
 
         // 步骤2：异步检测并预加载下一号段（核心优化：避免号段耗尽时的阻塞）
@@ -224,7 +223,7 @@ public class IdUtils {
             
             // 如果Redis中不存在该key，从数据库读取当前最大值进行初始化
             if (!atomicLong.isExists()) {
-                Long dbMax = sequenceMapper.getCurrentValue(bizName);
+                Long dbMax = sequenceMapper.selectCurrentValueByName(bizName);
                 long initValue = dbMax == null ? 0 : dbMax;
                 atomicLong.set(initValue);
                 log.info("[IdUtils] Redis号段初始化 | bizName={}, dbMax={}, initValue={}", 
@@ -241,7 +240,7 @@ public class IdUtils {
             // 异步同步到数据库，确保最终一致性（不阻塞主流程）
             loaderExecutor.execute(() -> {
                 try {
-                    int affectedRows = sequenceMapper.syncRedisCurrentValue(bizName, endId);
+                    int affectedRows = sequenceMapper.upsertValueIfGreater(bizName, endId);
                     log.debug("[IdUtils] 号段异步同步到DB成功 | bizName={}, endId={}, affectedRows={}", 
                             bizName, endId, affectedRows);
                 } catch (Exception e) {
@@ -333,8 +332,8 @@ public class IdUtils {
         log.warn("[IdUtils] 执行DB降级分配ID | bizName={}", bizName);
         try {
             // 数据库原子递增
-            int affectedRows = sequenceMapper.insertOrUpdateAndIncrement(bizName);
-            long val = sequenceMapper.getCurrentValue(bizName);
+            int affectedRows = sequenceMapper.upsertAndIncrement(bizName);
+            long val = sequenceMapper.selectCurrentValueByName(bizName);
             
             log.warn("[IdUtils] DB降级分配成功 | bizName={}, currentValue={}, affectedRows={} | 警告：性能较低，建议检查Redis状态", 
                     bizName, val, affectedRows);

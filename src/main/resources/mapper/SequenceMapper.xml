@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="me.link.bootstrap.system.dal.mapper.SequenceMapper">
 
-    <insert id="syncRedisCurrentValue">
+    <insert id="upsertValueIfGreater">
         INSERT INTO system_sequence (
             biz_code,
             current_value,
@@ -18,7 +18,7 @@
             update_time = NOW()
     </insert>
 
-    <insert id="insertOrUpdateAndIncrement">
+    <insert id="upsertAndIncrement">
         INSERT INTO system_sequence (biz_code, current_value, version, create_time, update_time)
         VALUES (#{name}, 1, 0, NOW(), NOW())
         ON DUPLICATE KEY UPDATE
@@ -26,7 +26,7 @@
             update_time = NOW()
     </insert>
 
-    <select id="getCurrentValue" resultType="java.lang.Long">
+    <select id="selectCurrentValueByName" resultType="java.lang.Long">
         SELECT current_value
         FROM system_sequence
         WHERE biz_code = #{name}

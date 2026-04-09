@@ -15,7 +15,7 @@ public interface SequenceMapper extends BaseMapper<SequenceDO> {
      *
      * @return 影响行数
      */
-    int insertOrUpdateAndIncrement(@Param("name") String name);
+    int upsertAndIncrement(@Param("name") String name);
 
     /**
      * 获取当前的序列值
@@ -23,7 +23,7 @@ public interface SequenceMapper extends BaseMapper<SequenceDO> {
      *
      * @return 当前最大序列号
      */
-    Long getCurrentValue(@Param("name") String name);
+    Long selectCurrentValueByName(@Param("name") String name);
 
 
     /**
@@ -37,5 +37,5 @@ public interface SequenceMapper extends BaseMapper<SequenceDO> {
      * @param currentValue Redis 中缓存的当前序列值
      * @return 影响行数
      */
-    int syncRedisCurrentValue(@Param("name") String name, @Param("currentValue") Long currentValue);
+    int upsertValueIfGreater(@Param("name") String name, @Param("currentValue") Long currentValue);
 }
