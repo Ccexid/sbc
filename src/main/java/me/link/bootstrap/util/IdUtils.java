@@ -1,6 +1,7 @@
 package me.link.bootstrap.util;
 
 import cn.hutool.core.util.IdUtil;
+import com.alibaba.ttl.threadpool.TtlExecutors;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +17,10 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 分布式 ID 生成工具类，继承自 Hutool 的 IdUtil。
@@ -73,7 +78,20 @@ public class IdUtils extends IdUtil {
      * 由于 Spring 管理的 Bean 是实例变量，而对外提供的工具方法通常是静态的，
      * 因此需要通过此静态变量桥接，以便在静态方法中调用实例方法。
      */
-    private static IdUtils instance;
+    private static volatile IdUtils instance;
+
+    /**
+     * 用于异步同步序列值到数据库的线程池。
+     * 使用有界队列和固定线程数，避免高并发下资源耗尽。
+     */
+    private static final ExecutorService SYNC_EXECUTOR = TtlExecutors.getTtlExecutorService(new ThreadPoolExecutor(
+            2,
+            4,
+            60L,
+            TimeUnit.SECONDS,
+            new LinkedBlockingQueue<>(1000),
+            new ThreadPoolExecutor.CallerRunsPolicy()
+    ));
 
     /**
      * Spring 容器启动后的初始化钩子。
@@ -135,11 +153,12 @@ public class IdUtils extends IdUtil {
      * @return 格式化后的唯一 ID 字符串。
      */
     public String nextId(String prefix, int digit, boolean isDaily) {
-        // 获取当前日期字符串
+        // 获取当前时间，统一格式化
+        LocalDateTime now = LocalDateTime.now();
         // dateStrSeq: 用于构建唯一的 Redis Key，精确到秒，减少极端并发下的哈希冲突概率
-        String dateStrSeq = LocalDateTime.now().format(DATE_SEQ_FORMATTER);
+        String dateStrSeq = now.format(DATE_SEQ_FORMATTER);
         // dateStr: 用于最终 ID 展示，精确到天
-        String dateStr = LocalDateTime.now().format(DATE_FORMATTER);
+        String dateStr = now.format(DATE_FORMATTER);
 
         // 业务标识名，用于数据库查询
         // 按天模式：业务名包含日期，确保数据库中不同天的记录隔离（如果需要持久化每天的最大值）
@@ -180,6 +199,11 @@ public class IdUtils extends IdUtil {
             // 获取 Redis 原子长整型对象
             RAtomicLong atomicLong = redissonClient.getAtomicLong(ctx.key());
 
+            // 1. 核心改进：检查 Key 是否存在，若不存在（可能被删或过期），执行初始化
+            if (!atomicLong.isExists()) {
+                checkSequence(ctx, atomicLong);
+            }
+
             // 执行原子自增操作，返回自增后的值
             long sequence = atomicLong.incrementAndGet();
 
@@ -187,25 +211,21 @@ public class IdUtils extends IdUtil {
             // 仅在序列号为 1（即当天的第一个请求/新创建的 Key）且需要过期时设置过期时间
             // 这样可以避免每次请求都去计算和设置过期时间，提升性能
             if (sequence == 1 && ctx.shouldExpire()) {
-                // 计算当天 23:59:59.999... 的 Instant 时间点
-                var endOfDay = LocalDateTime.of(LocalDate.now(), LocalTime.MAX)
-                        .atZone(ZoneId.systemDefault())
-                        .toInstant();
-
-                // 设置过期时间，确保每天的数据自动清理，防止内存无限增长
-                // expire(Instant) 方法会让 Key 在指定时间点失效
-                atomicLong.expire(endOfDay);
+                if (atomicLong.remainTimeToLive() < 0) {
+                    var endOfDay = LocalDateTime.of(LocalDate.now(), LocalTime.MAX)
+                            .atZone(ZoneId.systemDefault()).toInstant();
+                    atomicLong.expire(endOfDay);
+                }
             }
-            // 2. 异步同步：建议增加判断，例如每 10 个 ID 同步一次，或者直接异步全量同步
-            // 这样即便 Redis 挂了，DB 里的值也最接近真实值
+
+            // 2. 异步同步
             CompletableFuture.runAsync(() -> {
                 try {
-                    long id = IdUtils.getSnowflakeNextId();
-                    sequenceMapper.syncRedisValue(ctx.bizName(), sequence);
+                    sequenceMapper.syncRedisCurrentValue(ctx.bizName(), sequence);
                 } catch (Exception e) {
-                    log.error("ID 异步同步失败: {}", e.getMessage());
+                    log.warn("ID 异步同步失败（非致命）: {}", e.getMessage());
                 }
-            });
+            }, SYNC_EXECUTOR);
             return sequence;
         } catch (Exception e) {
             // 捕获其他未预期的异常，同样触发降级
@@ -230,19 +250,60 @@ public class IdUtils extends IdUtil {
      */
     private long getSequence(String bizName) {
         try {
-            // 生成一个初始序列号，这里使用雪花算法作为基础，避免纯时间戳的重复问题
-            long sequence = IdUtils.getSnowflakeNextId();
-
             // 先进行原子操作进行数据更新获取最大序列号
             // upsertAndIncrement 应该保证在数据库层面的原子性（如使用 ON DUPLICATE KEY UPDATE 或 锁）
-            sequenceMapper.upsertAndIncrement(bizName);
+            sequenceMapper.insertOrUpdateAndIncrement(bizName);
 
             // 返回更新后的当前值
-            return sequenceMapper.selectCurrentValue(bizName);
+            return sequenceMapper.getCurrentValue(bizName);
         } catch (Exception ex) {
             // 捕获其他数据库异常
             log.error("数据库操作发生未知异常，使用时间戳最后保底！", ex);
             return System.currentTimeMillis() % 1000000;
+        }
+    }
+
+    /**
+     * 检查并初始化Redis序列计数器
+     * <p>
+     * 当Redis中的序列计数器不存在时，通过分布式锁保证线程安全地从数据库恢复序列值。
+     * 采用双重检查机制，避免高并发场景下多个请求同时查询数据库并重置Redis序列。
+     *
+     * @param ctx        ID上下文对象，包含业务名称等信息
+     * @param atomicLong Redis原子长整型计数器，用于存储和更新序列值
+     */
+    private void checkSequence(IdContext ctx, RAtomicLong atomicLong) {
+        // 使用分布式锁防止高并发下多个请求同时查询 DB 并重置 Redis
+        String lockKey = ctx.key() + ":lock";
+        var lock = redissonClient.getLock(lockKey);
+        boolean lockAcquired = false;
+        try {
+            // 等待锁 3秒，持有锁 10秒
+            lockAcquired = lock.tryLock(3, 10, java.util.concurrent.TimeUnit.SECONDS);
+            if (lockAcquired) {
+                // Double Check: 拿到锁后再查一遍 Key 是否存在
+                if (!atomicLong.isExists()) {
+                    Long dbValue = sequenceMapper.getCurrentValue(ctx.bizName());
+                    // 如果 DB 有值，则以 DB 为准；若无，则从 0 开始
+                    long startValue = (dbValue != null) ? dbValue : 0L;
+                    atomicLong.set(startValue);
+                    log.info("业务 {} Redis 序列初始化完成，起始值: {}", ctx.bizName(), startValue);
+                }
+            } else {
+                // 未获取到锁，短暂等待后再次检查（其他线程可能已初始化完成）
+                Thread.sleep(100);
+                if (!atomicLong.isExists()) {
+                    log.warn("业务 {} 获取分布式锁超时，Redis 序列仍未初始化，将从 0 开始", ctx.bizName());
+                    atomicLong.set(0L);
+                }
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.error("业务 {} 获取分布式锁被中断", ctx.bizName(), e);
+        } finally {
+            if (lockAcquired && lock.isHeldByCurrentThread()) {
+                lock.unlock();
+            }
         }
     }
 }

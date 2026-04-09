@@ -2,10 +2,7 @@ package me.link.bootstrap.system.dal.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import me.link.bootstrap.system.dal.domain.SequenceDO;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
+import org.apache.ibatis.annotations.*;
 
 @Mapper
 public interface SequenceMapper extends BaseMapper<SequenceDO> {
@@ -18,10 +15,7 @@ public interface SequenceMapper extends BaseMapper<SequenceDO> {
      *
      * @return 影响行数
      */
-    @Update("INSERT INTO system_sequence ( biz_code, current_value, version, create_time, update_time) " +
-            "VALUES ( #{name}, 1, 0, NOW(), NOW()) " +
-            "ON DUPLICATE KEY UPDATE current_value = current_value + 1, update_time = NOW()")
-    int upsertAndIncrement( @Param("name") String name);
+    int insertOrUpdateAndIncrement(@Param("name") String name);
 
     /**
      * 获取当前的序列值
@@ -29,8 +23,7 @@ public interface SequenceMapper extends BaseMapper<SequenceDO> {
      *
      * @return 当前最大序列号
      */
-    @Select("SELECT current_value FROM system_sequence WHERE biz_code = #{name}")
-    Long selectCurrentValue(@Param("name") String name);
+    Long getCurrentValue(@Param("name") String name);
 
 
     /**
@@ -44,10 +37,5 @@ public interface SequenceMapper extends BaseMapper<SequenceDO> {
      * @param currentValue Redis 中缓存的当前序列值
      * @return 影响行数
      */
-    @Update("INSERT INTO system_sequence ( biz_code, current_value, update_time) " +
-            "VALUES ( #{name}, #{currentValue}, NOW(),NOW()) " +
-            "ON DUPLICATE KEY UPDATE " +
-            "current_value = GREATEST(current_value, VALUES(current_value)), " +
-            "update_time = NOW()")
-    int syncRedisValue(@Param("name") String name, @Param("currentValue") Long currentValue);
+    int syncRedisCurrentValue(@Param("name") String name, @Param("currentValue") Long currentValue);
 }

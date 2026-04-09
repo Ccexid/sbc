@@ -1,7 +1,9 @@
 package me.link.bootstrap.core.mybatis.handler;
 
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.ReflectUtil;
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
+import lombok.extern.slf4j.Slf4j;
 import me.link.bootstrap.core.annotation.IdGenerator;
 import me.link.bootstrap.core.domain.BaseDO;
 import me.link.bootstrap.util.IdUtils;
@@ -18,6 +20,7 @@ import java.util.Objects;
  * 实现 MyBatis-Plus 的 MetaObjectHandler 接口，用于自动填充创建时间、更新时间及自定义主键
  */
 @Component
+@Slf4j
 public class DefaultDBFieldHandler implements MetaObjectHandler {
 
     /**
@@ -43,8 +46,11 @@ public class DefaultDBFieldHandler implements MetaObjectHandler {
             }
         }
 
+        Object originalObject = metaObject.getOriginalObject();
+        if (originalObject == null) return;
+
         // 处理带有 @IdGenerator 注解的主键字段
-        Field[] fields = metaObject.getOriginalObject().getClass().getDeclaredFields();
+        Field[] fields = ReflectUtil.getFields(originalObject.getClass());
         Arrays.asList(fields).forEach(field -> {
             if (field.isAnnotationPresent(IdGenerator.class)) {
                 var anno = field.getAnnotation(IdGenerator.class);
@@ -52,6 +58,7 @@ public class DefaultDBFieldHandler implements MetaObjectHandler {
                 if (ObjectUtil.isEmpty(currentValue)) {
                     String code = IdUtils.getNextId(anno.prefix(), anno.digit(), anno.daily());
                     this.setFieldValByName(field.getName(), code, metaObject);
+                    log.info("自动填充 ID 生成成功 - 字段: {}, 值: {}", field.getName(), code);
                 }
             }
         });
