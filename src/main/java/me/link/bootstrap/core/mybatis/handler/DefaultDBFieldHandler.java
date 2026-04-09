@@ -33,7 +33,6 @@ public class DefaultDBFieldHandler implements MetaObjectHandler {
     @Override
     public void insertFill(MetaObject metaObject) {
         LocalDateTime current = LocalDateTime.now();
-
         // 处理基础领域对象的时间字段
         if (metaObject.getOriginalObject() instanceof BaseDO baseDO) {
             // 创建时间为空，则以当前时间为插入时间
@@ -45,23 +44,6 @@ public class DefaultDBFieldHandler implements MetaObjectHandler {
                 baseDO.setUpdateTime(current);
             }
         }
-
-        Object originalObject = metaObject.getOriginalObject();
-        if (originalObject == null) return;
-
-        // 处理带有 @IdGenerator 注解的主键字段
-        Field[] fields = ReflectUtil.getFields(originalObject.getClass());
-        Arrays.asList(fields).forEach(field -> {
-            if (field.isAnnotationPresent(IdGenerator.class)) {
-                var anno = field.getAnnotation(IdGenerator.class);
-                Object currentValue = metaObject.getValue(field.getName());
-                if (ObjectUtil.isEmpty(currentValue)) {
-                    String code = IdUtils.getNextId(anno.prefix(), anno.digit(), anno.daily());
-                    this.setFieldValByName(field.getName(), code, metaObject);
-                    log.info("自动填充 ID 生成成功 - 字段: {}, 值: {}", field.getName(), code);
-                }
-            }
-        });
     }
 
     /**

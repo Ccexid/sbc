@@ -33,7 +33,6 @@ public class TenantPackageDO extends BaseDO {
      * 套餐名
      */
     @IdGenerator(prefix = "TP", digit = 6)
-    @TableField(fill = FieldFill.INSERT)
     private String name;
 
     /**

@@ -104,7 +104,7 @@ mybatis-plus:
 
 # 6. Sa-Token 安全配置
 sa-token:
-  token-name: tikToken
+  token-name: Authorization
   timeout: 3600 # 1小时
   active-timeout: 1800 # 30分钟无操作剔除
   is-concurrent: false # 不允许账号并发登录
@@ -116,6 +116,7 @@ sa-token:
   is-read-header: true
   is-read-cookie: true
   is-color-log: true
+  token-prefix: Bearer
 
 # 7. 监控配置 (对接 Spring Boot Admin / Actuator)
 management:
