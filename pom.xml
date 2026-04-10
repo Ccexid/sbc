@@ -38,6 +38,7 @@
         <commons-lang3.version>3.18.0</commons-lang3.version>
         <springdoc.version>2.8.16</springdoc.version>
         <caffeine.version>3.2.3</caffeine.version>
+        <guava.version>33.5.0-jre</guava.version>
     </properties>
 
     <dependencyManagement>
@@ -193,6 +194,11 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
         </dependency>
     </dependencies>
 

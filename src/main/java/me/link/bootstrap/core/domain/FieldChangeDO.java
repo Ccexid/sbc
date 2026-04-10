@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class FieldChangeDO {
     /**
-     * 字段名称或描述（优先取自 @Schema 注解，否则为字段名）
+     * 字段名称或描述（优先取自 @LogField 注解，否则为字段名）
      */
     private String fieldName;
 

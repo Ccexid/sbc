@@ -7,7 +7,9 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import me.link.bootstrap.core.annotation.OperationLog;
 import me.link.bootstrap.core.constants.GlobalApiConstants;
+import me.link.bootstrap.core.enums.OperationEnum;
 import me.link.bootstrap.core.pojo.SortablePageParam;
 import me.link.bootstrap.system.controller.vo.TenantExpiryRespVO;
 import me.link.bootstrap.system.dal.domain.TenantDO;
@@ -33,6 +35,7 @@ public class TenantController {
             @Parameter(name = "pageSize", description = "每页数量", required = true),
             @Parameter(name = "sort", description = "排序字段")
     })
+    @OperationLog(module = "租户接口", operation = OperationEnum.VIEWED, description = "查询列表")
     public ResponseEntity<IPage<TenantDO>> page(@Valid SortablePageParam param) {
         return ResponseEntity.ok(tenantService.searchByPage(param));
     }
