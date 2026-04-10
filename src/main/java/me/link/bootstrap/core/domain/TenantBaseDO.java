@@ -2,6 +2,7 @@ package me.link.bootstrap.core.domain;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import me.link.bootstrap.core.annotation.LogField;
 
 import java.io.Serial;
 
@@ -14,5 +15,6 @@ public abstract class TenantBaseDO extends BaseDO {
     /**
      * 租户 ID
      */
+    @LogField(value = "租户编号")
     private Long tenantId;
 }
