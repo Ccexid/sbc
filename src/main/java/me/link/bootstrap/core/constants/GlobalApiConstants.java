@@ -43,17 +43,25 @@ public interface GlobalApiConstants {
      * </p>
      */
     String TRACE_ID_HEADER = "X-Trace-Id";
-    
+
+    /**
+     * 链路追踪 ID 的日志键名
+     * <p>
+     * 用于在 MDC（Mapped Diagnostic Context）中标识 TraceId 的键
+     * </p>
+     */
+    String TRACE_ID_KEY = "traceId";
+
     /**
      * 应用项目名称
      */
-    String APP_PROJECT_NAME = "bootstrap-link";
-    
+    String TRACE_ID_PREFIX = "TraceId";
+
     /**
      * 序列号最大长度
      */
     int MAX_SEQ_LENGTH = 999999;
-    
+
     /**
      * 日期时间格式化器 - 年月日时分格式
      * <p>
@@ -61,7 +69,7 @@ public interface GlobalApiConstants {
      * </p>
      */
     String FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE = "yyyyMMddHHmm";
-    
+
     /**
      * 日期时间格式化器 - 年月日时分秒格式
      * <p>
@@ -69,7 +77,7 @@ public interface GlobalApiConstants {
      * </p>
      */
     String FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND_COMPACT = "yyyyMMddHHmmss";
-    
+
     /**
      * 日期时间格式化器 - 年月日时分秒毫秒格式
      * <p>
@@ -77,7 +85,7 @@ public interface GlobalApiConstants {
      * </p>
      */
     String FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND_MILLI_COMPACT = "yyyyMMddHHmmssSSS";
-    
+
     /**
      * 日期时间格式化器 - 年月日紧凑格式
      * <p>

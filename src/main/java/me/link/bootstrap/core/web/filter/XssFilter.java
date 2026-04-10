@@ -4,7 +4,6 @@ import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
 import me.link.bootstrap.core.web.servlet.XssHttpServletRequestWrapper;
-import org.springframework.context.annotation.Configuration;
 
 import java.io.IOException;
 
@@ -13,8 +12,8 @@ import java.io.IOException;
  * <p>
  * 实现 Servlet Filter 接口，用于拦截和处理 HTTP 请求，防止跨站脚本攻击（XSS）。
  * 通过将请求包装在 XssHttpServletRequestWrapper 中，自动对所有输入进行 HTML 过滤处理。
+ * </p>
  */
-@Configuration
 public class XssFilter implements Filter {
     /**
      * 执行过滤操作
