@@ -52,12 +52,18 @@ public interface TenantAssembler extends BaseConverter {
     /**
      * 领域实体转视图对象
      * <p>
-     * 将租户领域实体转换为视图对象，用于前端展示
+     * 将租户领域实体转换为视图对象，用于前端展示。
+     * 注意：派生字段（如 expired, remainingDays）需在 Service 层手动计算并设置，
+     * 或通过自定义 default 方法实现。
      * </p>
      *
      * @param tenant 租户领域实体
      * @return 租户视图对象
      */
+    @Mapping(target = "expired", source = "expired")
+    @Mapping(target = "remainingDays", ignore = true)
+    @Mapping(target = "currentAccountCount", ignore = true)
+    @Mapping(target = "packageName", ignore = true)
     TenantVO toVO(Tenant tenant);
 
     /**
@@ -70,4 +76,18 @@ public interface TenantAssembler extends BaseConverter {
      * @return 租户视图对象列表
      */
     List<TenantVO> toVOList(List<Tenant> tenantList);
+
+    // ==================== 自定义映射逻辑 ====================
+
+    /**
+     * 默认方法：处理从 Entity 到 VO 的复杂派生字段映射
+     * 如果需要在 Assembler 层直接计算，可在此实现
+     */
+    default void populateDerivedFields(Tenant tenant, TenantVO vo) {
+        if (tenant != null && vo != null) {
+            vo.setExpired(tenant.isExpired());
+            // remainingDays, currentAccountCount, packageName 通常需要关联查询或缓存，
+            // 建议在 Service 层组装，此处留空或仅做简单映射
+        }
+    }
 }

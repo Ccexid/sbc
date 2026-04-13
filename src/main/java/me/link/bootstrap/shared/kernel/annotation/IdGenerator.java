@@ -1,4 +1,4 @@
-package me.link.bootstrap.shared.infrastructure.idgen;
+package me.link.bootstrap.shared.kernel.annotation;
 
 import me.link.bootstrap.shared.infrastructure.mybatis.handler.DefaultDBFieldHandler;
 

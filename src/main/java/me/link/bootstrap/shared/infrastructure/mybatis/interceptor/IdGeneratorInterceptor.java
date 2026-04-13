@@ -1,7 +1,7 @@
 package me.link.bootstrap.shared.infrastructure.mybatis.interceptor;
 
 import lombok.extern.slf4j.Slf4j;
-import me.link.bootstrap.shared.infrastructure.idgen.IdGenerator;
+import me.link.bootstrap.shared.kernel.annotation.IdGenerator;
 import me.link.bootstrap.shared.util.IdUtil;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.mapping.MappedStatement;

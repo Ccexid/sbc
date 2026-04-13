@@ -37,7 +37,7 @@ public class TenantVO {
     @Schema(description = "套餐名称 (通过关联查询或缓存获取)", example = "尊享版套餐")
     private String packageName;
 
-    @Schema(description = "过期时间")
+    @Schema(description = "过期时间", example = "2024-12-31 23:59:59")
     private LocalDateTime expireTime;
 
     @Schema(description = "账号数量限制", example = "100")
@@ -46,13 +46,13 @@ public class TenantVO {
     @Schema(description = "当前已使用账号数", example = "42")
     private Integer currentAccountCount;
 
-    @Schema(description = "创建时间")
+    @Schema(description = "创建时间", example = "2023-01-01 12:00:00")
     private LocalDateTime createTime;
 
     // --- 派生展示字段 (UI 友好型) ---
 
     @Schema(description = "是否已过期", example = "false")
-    private Boolean isExpired;
+    private Boolean expired;
 
     @Schema(description = "剩余天数", example = "365")
     private Long remainingDays;

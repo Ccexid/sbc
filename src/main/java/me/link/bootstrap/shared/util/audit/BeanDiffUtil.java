@@ -1,10 +1,9 @@
-package me.link.bootstrap.shared.util;
+package me.link.bootstrap.shared.util.audit;
 
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.ReflectUtil;
 import lombok.extern.slf4j.Slf4j;
 import me.link.bootstrap.shared.kernel.annotation.LogField;
-import me.link.bootstrap.shared.util.audit.FieldChange;
 import org.springframework.util.ClassUtils;
 
 import java.lang.reflect.Field;

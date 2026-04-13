@@ -3,6 +3,7 @@ package me.link.bootstrap.modules.system.application.dto.command;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.Data;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -43,11 +44,14 @@ public class CreateTenantCmd {
     @Min(value = 1, message = "账号额度至少为 1")
     private Integer accountCount;
 
-    @Schema(description = "绑定域名数组")
+    @Schema(description = "绑定域名数组", example = "[\"example.com\", \"test.com\"]")
+    @Size(max = 10, message = "绑定域名数量不能超过 10 个")
     private List<String> websites;
 
-    @Schema(description = "初始管理员密码", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "初始管理员密码", requiredMode = Schema.RequiredMode.REQUIRED, example = "Abc@123456")
     @NotBlank(message = "初始密码不能为空")
-    @Size(min = 6, max = 20, message = "密码长度必须在 6-20 位之间")
+    @Size(min = 8, max = 20, message = "密码长度必须在 8-20 位之间")
+    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$", 
+             message = "密码必须包含大小写字母、数字和特殊字符")
     private String adminPassword;
 }
