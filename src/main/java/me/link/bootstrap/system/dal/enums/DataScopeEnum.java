@@ -5,8 +5,6 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import java.util.Arrays;
-
 /**
  * 数据范围枚举
  * 对应 system_role 表中的 data_scope 字段

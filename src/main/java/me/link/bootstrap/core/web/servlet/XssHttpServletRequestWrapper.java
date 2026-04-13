@@ -76,7 +76,13 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
          * 确保多值参数的所有元素都经过 XSS 防护
          */
         for (int i = 0; i < count; i++) {
-            encodedValues[i] = HtmlUtil.filter(values[i]);
+            String value = values[i];
+            // 核心修复：如果是 null 或者空字符串，直接赋值，不走过滤器
+            if (value == null || value.isEmpty()) {
+                encodedValues[i] = value;
+            } else {
+                encodedValues[i] = HtmlUtil.filter(value);
+            }
         }
         return encodedValues;
     }

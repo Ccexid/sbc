@@ -19,9 +19,9 @@
     </insert>
 
     <insert id="upsertAndIncrement">
-        INSERT INTO system_sequence (biz_code, current_value, version, create_time, update_time)
-        VALUES (#{name}, 1, 0, NOW(), NOW())
-        ON DUPLICATE KEY UPDATE
+        INSERT INTO system_sequence (biz_code, current_value, create_time, update_time)
+        VALUES (#{name}, 0, NOW(), NOW()) ON DUPLICATE KEY
+        UPDATE
             current_value = current_value + 1,
             update_time = NOW()
     </insert>

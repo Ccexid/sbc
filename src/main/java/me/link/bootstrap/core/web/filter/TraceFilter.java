@@ -47,10 +47,6 @@ public class TraceFilter implements Filter {
             // 3. 继续执行过滤链
             chain.doFilter(servletRequest, servletResponse);
 
-        } catch (IOException | ServletException e) {
-            // 4. 记录标准 Web 异常日志，并向上抛出
-            log.error("TraceFilter encountered a web exception", e);
-            throw e;
         } catch (Exception e) {
             // 5. 记录其他运行时异常，并包装为 ServletException 向上抛出
             log.error("TraceFilter encountered an unexpected exception", e);

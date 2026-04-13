@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static me.link.bootstrap.core.constants.GlobalApiConstants.FORMAT_YEAR_MONTH_DAY_COMPACT;
 import static me.link.bootstrap.core.constants.GlobalApiConstants.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND_COMPACT;
@@ -40,9 +41,15 @@ public class IdUtils {
     private final Map<String, IdSegment> segmentCache = new ConcurrentHashMap<>();
 
     // 专门用于异步加载号段的线程池
+    private final AtomicInteger threadNumber = new AtomicInteger(1);
     private final ExecutorService loaderExecutor = new ThreadPoolExecutor(
             2, 4, 60L, TimeUnit.SECONDS,
             new LinkedBlockingQueue<>(200),
+            r -> {
+                Thread thread = new Thread(r, "id-loader-" + threadNumber.getAndIncrement());
+                thread.setDaemon(true);
+                return thread;
+            },
             new ThreadPoolExecutor.CallerRunsPolicy()
     );
 
@@ -121,7 +128,7 @@ public class IdUtils {
      * @return 生成的ID字符串
      */
     private String generateId(String prefix, int digit, boolean isDaily) {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = SystemClockUtils.localDateTime();
         String todayStr = now.format(DATE_FORMATTER);
         // 构建业务标识：按天场景附加日期后缀，实现每日独立计数
         String bizName = isDaily ? prefix + ":" + todayStr : prefix;

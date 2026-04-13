@@ -1,5 +1,8 @@
 package me.link.bootstrap.util;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -13,8 +16,8 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public final class SystemClockUtils {
 
-    /** 更新频率（毫秒）。1ms 兼顾了精度与性能。 */
-    private static final long UPDATE_PERIOD_MS = 1L;
+    /** 更新频率（毫秒）。10ms 兼顾了精度与性能。 */
+    private static final long UPDATE_PERIOD_MS = 10L;
 
     private static final AtomicLong NOW = new AtomicLong(System.currentTimeMillis());
 
@@ -54,6 +57,15 @@ public final class SystemClockUtils {
      */
     public static long now() {
         return NOW.get();
+    }
+
+        /**
+     * 获取当前缓存时间对应的 LocalDateTime。
+     *
+     * @return 当前 LocalDateTime
+     */
+    public static LocalDateTime localDateTime() {
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(now()), ZoneId.systemDefault());
     }
 
     /**

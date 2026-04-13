@@ -31,7 +31,7 @@ public enum StatusEnum implements IEnum<Integer> {
     /**
      * 状态描述（返回给前端）
      */
-    @JsonValue  // 标记返回给前端的值（如果你想返回"正常"而不是 0）
+    @JsonValue
     private final String desc;
 
     /**

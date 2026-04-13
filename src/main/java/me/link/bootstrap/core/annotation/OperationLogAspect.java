@@ -42,6 +42,6 @@ public class OperationLogAspect {
         if (ObjectUtil.isEmpty(expression)) return 0L;
         Map<String, Object> vars = result != null ? Map.of("result", result) : Collections.emptyMap();
         String val = SpelUtils.parseExpression(joinPoint, expression, vars);
-        return ObjectUtil.isEmpty(val) ? 0L : Long.getLong(val);
+        return ObjectUtil.isEmpty(val) ? 0L : Long.parseLong(val);
     }
 }

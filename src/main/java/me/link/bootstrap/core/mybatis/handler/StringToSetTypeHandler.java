@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
  * </p>
  */
 @MappedJdbcTypes(JdbcType.VARCHAR)
-@MappedTypes(List.class)
+@MappedTypes(Set.class)
 public class StringToSetTypeHandler extends BaseTypeHandler<Set<String>> {
 
     /**

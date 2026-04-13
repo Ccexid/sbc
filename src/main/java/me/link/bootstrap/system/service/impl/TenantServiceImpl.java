@@ -2,7 +2,6 @@ package me.link.bootstrap.system.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -17,6 +16,7 @@ import me.link.bootstrap.system.dal.domain.TenantDO;
 import me.link.bootstrap.system.dal.enums.ExpiredEnum;
 import me.link.bootstrap.system.dal.mapper.TenantMapper;
 import me.link.bootstrap.system.service.TenantService;
+import me.link.bootstrap.util.SystemClockUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -40,17 +40,14 @@ public class TenantServiceImpl extends ServiceImpl<TenantMapper, TenantDO> imple
         // 获取租户信息（包含状态校验）
         TenantDO tenant = this.getByIdWithFallback(id);
 
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = SystemClockUtils.localDateTime();
         LocalDateTime expireTime = tenant.getExpireTime();
 
         // 1. 判断是否过期
         boolean isExpired = expireTime != null && now.isAfter(expireTime);
 
         // 2. 计算剩余天数 (使用 ChronoUnit)
-        long days = 0;
-        if (expireTime != null && !isExpired) {
-            days = ChronoUnit.DAYS.between(now, expireTime);
-        }
+        long days = expireTime != null ? ChronoUnit.DAYS.between(now, expireTime) : 0;
 
         return TenantExpiryRespVO.builder()
                 .isExpired(isExpired)

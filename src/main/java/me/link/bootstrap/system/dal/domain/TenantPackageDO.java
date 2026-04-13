@@ -1,9 +1,13 @@
 package me.link.bootstrap.system.dal.domain;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
-import lombok.*;
-import me.link.bootstrap.core.annotation.IdGenerator;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import me.link.bootstrap.core.domain.BaseDO;
 import me.link.bootstrap.core.enums.StatusEnum;
 
@@ -32,7 +36,6 @@ public class TenantPackageDO extends BaseDO {
     /**
      * 套餐名
      */
-    @IdGenerator(prefix = "TP", digit = 6)
     private String name;
 
     /**

@@ -54,12 +54,12 @@ public enum OperationEnum {
     /**
      * 状态值（存储到数据库）
      */
-    @EnumValue // 标记数据库存的值
+    @EnumValue
     private final Integer value;
 
     /**
      * 状态描述（返回给前端）
      */
-    @JsonValue  // 标记返回给前端的值（如果你想返回"正常"而不是 0）
+    @JsonValue
     private final String desc;
 }

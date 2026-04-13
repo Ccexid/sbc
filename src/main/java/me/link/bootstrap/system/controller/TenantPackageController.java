@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import me.link.bootstrap.core.constants.GlobalApiConstants;
-import me.link.bootstrap.core.exception.GlobalException;
 import me.link.bootstrap.system.dal.domain.TenantPackageDO;
 import me.link.bootstrap.system.service.TenantPackageService;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +21,7 @@ public class TenantPackageController {
 
     @PostMapping
     @Operation(summary = "保存租户套餐")
-    @Transactional(rollbackFor = GlobalException.class)
+    @Transactional(rollbackFor = Exception.class)
     public ResponseEntity<Boolean> createTenantPackage(@Validated @RequestBody TenantPackageDO tenantPackage) {
         return ResponseEntity.ok(tenantPackageService.save(tenantPackage));
     }
