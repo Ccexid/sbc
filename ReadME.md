@@ -1,3 +1,226 @@
 # ReadME
 
 ## Descriptions
+
+```text
+src/
+├── main/
+│   ├── java/me/link/bootstrap/
+│   │   ├── LinkMainApplication.java                    # 启动类
+│   │   │
+│   │   ├── modules/                                    # 业务模块（Bounded Contexts）
+│   │   │   └── system/                                 # 系统上下文
+│   │   │       ├── application/                        # 应用层
+│   │   │       │   ├── assembler/                      # 对象转换器
+│   │   │       │   │   └── TenantAssembler.java        # 租户转换器（Command/VO ↔ Entity）
+│   │   │       │   │
+│   │   │       │   ├── dto/                            # 数据传输对象
+│   │   │       │   │   ├── command/                    # 命令对象（写操作）⚠️ 待创建
+│   │   │       │   │   │   ├── CreateTenantCmd.java
+│   │   │       │   │   │   ├── UpdateTenantCmd.java
+│   │   │       │   │   │   ├── CreateUserCmd.java
+│   │   │       │   │   │   └── CreateRoleCmd.java
+│   │   │       │   │   │
+│   │   │       │   │   ├── query/                      # 查询对象（读操作）⚠️ 待创建
+│   │   │       │   │   │   └── TenantPageQuery.java
+│   │   │       │   │   │
+│   │   │       │   │   └── vo/                         # 视图对象
+│   │   │       │   │       ├── TenantExpiryRespVO.java
+│   │   │       │   │       ├── TenantPackageUpdateReqVO.java
+│   │   │       │   │       ├── TenantVO.java           # ⚠️ 待创建
+│   │   │       │   │       ├── UserVO.java             # ⚠️ 待创建
+│   │   │       │   │       └── RoleVO.java             # ⚠️ 待创建
+│   │   │       │   │
+│   │   │       │   └── service/                        # 应用服务
+│   │   │       │       ├── TenantAppService.java       # ✅ 已创建
+│   │   │       │       ├── TenantService.java          # ⚠️ 旧文件，待删除或迁移
+│   │   │       │       ├── TenantPackageService.java   # ⚠️ 旧文件，待删除或迁移
+│   │   │       │       ├── OperateLogService.java      # ⚠️ 旧文件，待删除或迁移
+│   │   │       │       │
+│   │   │       │       └── impl/                       # ⚠️ 旧实现，待重构
+│   │   │       │           ├── TenantServiceImpl.java
+│   │   │       │           ├── TenantPackageServiceImpl.java
+│   │   │       │           └── OperateLogServiceImpl.java
+│   │   │       │
+│   │   │       ├── domain/                             # 领域层 ⭐核心
+│   │   │       │   ├── model/                          # 领域模型
+│   │   │       │   │   ├── entity/                     # 领域实体 ⚠️ 待从 infrastructure 提取
+│   │   │       │   │   │   ├── Tenant.java
+│   │   │       │   │   │   ├── User.java
+│   │   │       │   │   │   ├── Role.java
+│   │   │       │   │   │   ├── Menu.java
+│   │   │       │   │   │   ├── Organization.java
+│   │   │       │   │   │   └── TenantPackage.java
+│   │   │       │   │   │
+│   │   │       │   │   ├── valueobject/                # 值对象
+│   │   │       │   │   │   ├── DataScopeEnum.java      # ✅ 已存在
+│   │   │       │   │   │   ├── ExpiredEnum.java        # ✅ 已存在
+│   │   │       │   │   │   ├── MenuTypeEnum.java       # ✅ 已存在
+│   │   │       │   │   │   ├── PlatformEnum.java       # ✅ 已存在
+│   │   │       │   │   │   └── RoleTypeEnum.java       # ✅ 已存在
+│   │   │       │   │   │
+│   │   │       │   │   └── aggregate/                  # 聚合根 ⚠️ 待创建
+│   │   │       │   │       └── TenantAggregate.java
+│   │   │       │   │
+│   │   │       │   ├── repository/                     # 仓储接口 ⚠️ 待创建
+│   │   │       │   │   ├── TenantRepository.java
+│   │   │       │   │   ├── UserRepository.java
+│   │   │       │   │   ├── RoleRepository.java
+│   │   │       │   │   └── MenuRepository.java
+│   │   │       │   │
+│   │   │       │   ├── service/                        # 领域服务 ⚠️ 待创建
+│   │   │       │   │   ├── TenantDomainService.java
+│   │   │       │   │   └── UserDomainService.java
+│   │   │       │   │
+│   │   │       │   └── event/                          # 领域事件 ⚠️ 待创建
+│   │   │       │       ├── TenantCreatedEvent.java
+│   │   │       │       └── UserRegisteredEvent.java
+│   │   │       │
+│   │   │       ├── infrastructure/                     # 基础设施层
+│   │   │       │   ├── converter/                      # 对象转换器（PO ↔ Entity）
+│   │   │       │   │   ├── TenantConverter.java        # ✅ 已创建
+│   │   │       │   │   ├── UserConverter.java          # ✅ 已创建
+│   │   │       │   │   └── RoleConverter.java          # ✅ 已创建
+│   │   │       │   │
+│   │   │       │   └── persistence/                    # 持久化实现
+│   │   │       │       ├── mapper/                     # MyBatis Mapper
+│   │   │       │       │   ├── TenantMapper.java       # ✅ 已存在
+│   │   │       │       │   ├── UserMapper.java         # ✅ 已存在
+│   │   │       │       │   ├── RoleMapper.java         # ✅ 已存在
+│   │   │       │       │   ├── MenuMapper.java         # ✅ 已存在
+│   │   │       │       │   ├── OrganizationMapper.java # ✅ 已存在
+│   │   │       │       │   ├── TenantPackageMapper.java# ✅ 已存在
+│   │   │       │       │   ├── UserRoleMapper.java     # ✅ 已存在
+│   │   │       │       │   ├── RoleMenuMapper.java     # ✅ 已存在
+│   │   │       │       │   ├── SequenceMapper.java     # ✅ 已存在
+│   │   │       │       │   └── OperateLogMapper.java   # ✅ 已存在
+│   │   │       │       │
+│   │   │       │       ├── po/                         # 持久化对象（原 DO）
+│   │   │       │       │   ├── TenantPO.java           # ⚠️ 待从 entity 移动并重命名
+│   │   │       │       │   ├── UserPO.java             # ⚠️ 待从 entity 移动并重命名
+│   │   │       │       │   ├── RolePO.java             # ⚠️ 待从 entity 移动并重命名
+│   │   │       │       │   ├── MenuPO.java             # ⚠️ 待从 entity 移动并重命名
+│   │   │       │       │   ├── OrganizationPO.java     # ⚠️ 待从 entity 移动并重命名
+│   │   │       │       │   ├── TenantPackagePO.java    # ⚠️ 待从 entity 移动并重命名
+│   │   │       │       │   ├── UserRolePO.java         # ⚠️ 待从 entity 移动并重命名
+│   │   │       │       │   ├── RoleMenuPO.java         # ⚠️ 待从 entity 移动并重命名
+│   │   │       │       │   ├── SequencePO.java         # ⚠️ 待从 entity 移动并重命名
+│   │   │       │       │   └── OperateLogPO.java       # ⚠️ 待从 entity 移动并重命名
+│   │   │       │       │
+│   │   │       │       └── repository/                 # 仓储实现
+│   │   │       │           └── TenantRepositoryImpl.java # ✅ 已创建
+│   │   │       │
+│   │   │       └── interfaces/                         # 用户接口层
+│   │   │           ├── controller/                     # REST API
+│   │   │           │   ├── TenantController.java       # ✅ 已存在
+│   │   │           │   └── TenantPackageController.java# ✅ 已存在
+│   │   │           │
+│   │   │           ├── listener/                       # 消息监听器 ⚠️ 预留
+│   │   │           └── scheduler/                      # 定时任务 ⚠️ 预留
+│   │   │
+│   │   └── shared/                                     # 共享内核（Shared Kernel）
+│   │       ├── kernel/                                 # 核心抽象
+│   │       │   ├── annotation/                         # 全局注解
+│   │       │   │   ├── LogField.java                   # ✅ 已存在
+│   │       │   │   ├── OperationLog.java               # ✅ 已存在
+│   │       │   │   └── OperationLogAspect.java         # ✅ 已存在
+│   │       │   │
+│   │       │   ├── constants/                          # 全局常量
+│   │       │   │   └── GlobalConstants.java            # ✅ 已存在
+│   │       │   │
+│   │       │   ├── enums/                              # 全局枚举
+│   │       │   │   ├── OperationEnum.java              # ✅ 已存在
+│   │       │   │   └── StatusEnum.java                 # ✅ 已存在
+│   │       │   │
+│   │       │   ├── exception/                          # 全局异常
+│   │       │   │   └── GlobalException.java            # ✅ 已存在
+│   │       │   │
+│   │       │   ├── pojo/                               # 通用参数对象
+│   │       │   │   ├── FieldMaskParam.java             # ✅ 已存在
+│   │       │   │   ├── PageParam.java                  # ✅ 已存在
+│   │       │   │   ├── SortablePageParam.java          # ✅ 已存在
+│   │       │   │   └── SortingField.java               # ✅ 已存在
+│   │       │   │
+│   │       │   └── result/                             # 统一响应 ⚠️ 待创建
+│   │       │       ├── Result.java
+│   │       │       └── PageResult.java
+│   │       │
+│   │       ├── infrastructure/                         # 共享基础设施
+│   │       │   ├── converter/                          # 基础转换器
+│   │       │   │   └── BaseConverter.java              # ✅ 已创建
+│   │       │   │
+│   │       │   ├── mybatis/                            # MyBatis 增强
+│   │       │   │   ├── config/
+│   │       │   │   │   └── MybatisAutoConfiguration.java # ✅ 已存在
+│   │       │   │   ├── domain/
+│   │       │   │   │   └── BaseDO.java                 # ✅ 已存在（基类）
+│   │       │   │   ├── handler/
+│   │       │   │   │   ├── DefaultDBFieldHandler.java  # ✅ 已存在
+│   │       │   │   │   └── StringToSetTypeHandler.java # ✅ 已存在
+│   │       │   │   ├── interceptor/
+│   │       │   │   │   └── IdGeneratorInterceptor.java # ✅ 已存在
+│   │       │   │   └── mapper/
+│   │       │   │       └── BaseMapperX.java            # ✅ 已存在
+│   │       │   │
+│   │       │   ├── web/                                # Web 基础设施
+│   │       │   │   ├── config/
+│   │       │   │   │   ├── FilterConfig.java           # ✅ 已存在
+│   │       │   │   │   ├── JacksonConfiguration.java   # ✅ 已存在
+│   │       │   │   │   ├── UndertowConfiguration.java  # ✅ 已存在
+│   │       │   │   │   └── WebMvcConfig.java           # ✅ 已存在
+│   │       │   │   ├── filter/
+│   │       │   │   │   ├── TraceFilter.java            # ✅ 已存在
+│   │       │   │   │   └── XssFilter.java              # ✅ 已存在
+│   │       │   │   ├── interceptor/                    # ⚠️ 预留
+│   │       │   │   └── servlet/
+│   │       │   │       └── XssHttpServletRequestWrapper.java # ✅ 已存在
+│   │       │   │
+│   │       │   ├── thread/                             # 线程池管理
+│   │       │   │   ├── ThreadPoolConfig.java           # ✅ 已存在
+│   │       │   │   └── TraceTaskDecorator.java         # ✅ 已存在
+│   │       │   │
+│   │       │   └── idgen/                              # ID 生成器
+│   │       │       ├── IdGenerator.java                # ✅ 已存在（注解）
+│   │       │       └── IdSegment.java                  # ✅ 已存在（号段模型）
+│   │       │
+│   │       └── utils/                                  # 通用工具类
+│   │           ├── audit/                              # 审计工具
+│   │           │   └── FieldChange.java                # ✅ 已存在（原 FieldChangeDO）
+│   │           │
+│   │           ├── BeanDiffUtils.java                  # ✅ 已存在
+│   │           ├── IdUtils.java                        # ✅ 已存在
+│   │           ├── SpelUtils.java                      # ✅ 已存在
+│   │           ├── SystemClockUtils.java               # ✅ 已存在
+│   │           ├── ThreadPoolUtils.java                # ✅ 已存在
+│   │           └── TraceUtils.java                     # ✅ 已存在
+│   │
+│   └── resources/
+│       ├── META-INF/services/
+│       │   └── me.link.bootstrap.core.log.spi.AuditLogStorage
+│       │
+│       ├── mapper/                                     # MyBatis XML
+│       │   ├── MenuMapper.xml
+│       │   ├── OperateLogMapper.xml
+│       │   ├── OrganizationMapper.xml
+│       │   ├── RoleMapper.xml
+│       │   ├── RoleMenuMapper.xml
+│       │   ├── SequenceMapper.xml
+│       │   ├── TenantMapper.xml
+│       │   ├── TenantPackageMapper.xml
+│       │   ├── UserMapper.xml
+│       │   └── UserRoleMapper.xml
+│       │
+│       ├── application.yml                             # 应用配置
+│       ├── logback-spring.xml                          # 日志配置
+│       ├── schema.sql                                  # 数据库脚本
+│       └── spy.properties                              # P6Spy 配置
+│
+├── sql/mysql/
+│   └── link-DDL-v0.1.sql                               # DDL 建表脚本
+│
+└── test/java/me/link/bootstrap/
+    ├── utils/                                          # ⚠️ 注意：应该是 util（单数）
+    └── LinkMainApplicationTests.java                   # 启动测试
+
+
+```
