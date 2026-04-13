@@ -1,4 +1,4 @@
-package me.link.bootstrap.shared.utils;
+package me.link.bootstrap.shared.util;
 
 import com.alibaba.ttl.threadpool.TtlExecutors;
 import java.util.concurrent.Executor;
@@ -8,9 +8,9 @@ import java.util.concurrent.ExecutorService;
  * 线程池增强工具类
  * 提供对原生线程池的 TTL 增强包装，支持跨线程链路追踪
  */
-public class ThreadPoolUtils {
+public class ThreadPoolUtil {
 
-    private ThreadPoolUtils() {
+    private ThreadPoolUtil() {
         // 工具类私有构造，防止实例化
     }
 

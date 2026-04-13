@@ -21,7 +21,7 @@ import java.util.Map;
 @ToString(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class OperateLogDO extends TenantBasePO {
+public class OperateLogPO extends TenantBasePO {
     /**
      * 自增编号
      */

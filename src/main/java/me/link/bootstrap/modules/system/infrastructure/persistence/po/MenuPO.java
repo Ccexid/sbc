@@ -20,7 +20,7 @@ import me.link.bootstrap.modules.system.domain.model.valueobject.MenuTypeEnum;
 @ToString(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class MenuDO extends TenantBasePO {
+public class MenuPO extends TenantBasePO {
 
     /**
      * 菜单ID

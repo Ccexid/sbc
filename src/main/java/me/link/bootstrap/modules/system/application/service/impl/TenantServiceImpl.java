@@ -12,11 +12,11 @@ import me.link.bootstrap.shared.kernel.exception.GlobalException;
 import me.link.bootstrap.shared.kernel.pojo.SortablePageParam;
 import me.link.bootstrap.shared.kernel.pojo.SortingField;
 import me.link.bootstrap.modules.system.application.dto.vo.TenantExpiryRespVO;
-import me.link.bootstrap.modules.system.infrastructure.persistence.po.TenantDO;
+import me.link.bootstrap.modules.system.infrastructure.persistence.po.TenantPO;
 import me.link.bootstrap.modules.system.domain.model.valueobject.ExpiredEnum;
 import me.link.bootstrap.modules.system.infrastructure.persistence.mapper.TenantMapper;
 import me.link.bootstrap.modules.system.application.service.TenantService;
-import me.link.bootstrap.shared.utils.SystemClockUtils;
+import me.link.bootstrap.shared.util.SystemClockUtil;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -27,7 +27,7 @@ import java.util.List;
  * 租户服务实现类
  */
 @Service
-public class TenantServiceImpl extends ServiceImpl<TenantMapper, TenantDO> implements TenantService {
+public class TenantServiceImpl extends ServiceImpl<TenantMapper, TenantPO> implements TenantService {
 
     /**
      * 检查租户是否过期并返回相关状态信息
@@ -38,9 +38,9 @@ public class TenantServiceImpl extends ServiceImpl<TenantMapper, TenantDO> imple
     @Override
     public TenantExpiryRespVO isExpired(Long id) {
         // 获取租户信息（包含状态校验）
-        TenantDO tenant = this.getByIdWithFallback(id);
+        TenantPO tenant = this.getByIdWithFallback(id);
 
-        LocalDateTime now = SystemClockUtils.localDateTime();
+        LocalDateTime now = SystemClockUtil.localDateTime();
         LocalDateTime expireTime = tenant.getExpireTime();
 
         // 1. 判断是否过期
@@ -65,13 +65,13 @@ public class TenantServiceImpl extends ServiceImpl<TenantMapper, TenantDO> imple
      *                  <li>sort: 排序字段字符串，多个字段使用逗号分隔，字段前加 - 表示降序</li>
      *                  <li>示例：-createTime,id 表示先按创建时间降序，再按 ID 升序</li>
      *              </ul>
-     * @return {@link IPage}<{@link TenantDO}> 包含租户数据的分页结果，每页包含租户的详细信息
+     * @return {@link IPage}<{@link TenantPO}> 包含租户数据的分页结果，每页包含租户的详细信息
      */
     @Override
-    public IPage<TenantDO> searchByPage(SortablePageParam param) {
+    public IPage<TenantPO> searchByPage(SortablePageParam param) {
 
         List<SortingField> sorts = param.getSortingFields();
-        QueryWrapper<TenantDO> queryWrapper = new QueryWrapper<>();
+        QueryWrapper<TenantPO> queryWrapper = new QueryWrapper<>();
         if (CollUtil.isNotEmpty(sorts)) {
             sorts.forEach(sort ->
                     queryWrapper.orderBy(true, sort.isAsc(), sort.getField())
@@ -93,12 +93,12 @@ public class TenantServiceImpl extends ServiceImpl<TenantMapper, TenantDO> imple
      * @return 租户实体对象
      * @throws GlobalException 当查询结果为空时抛出“租户不存在”异常
      */
-    private TenantDO getByIdWithFallback(Long id) {
+    private TenantPO getByIdWithFallback(Long id) {
         // 构建查询条件：ID 匹配且状态正常
-        TenantDO tenant = this.getOne(
-                Wrappers.<TenantDO>lambdaQuery()
-                        .eq(TenantDO::getId, id)
-                        .eq(TenantDO::getStatus, StatusEnum.NORMAL)
+        TenantPO tenant = this.getOne(
+                Wrappers.<TenantPO>lambdaQuery()
+                        .eq(TenantPO::getId, id)
+                        .eq(TenantPO::getStatus, StatusEnum.NORMAL)
         );
 
         // 若未找到有效租户，抛出全局异常

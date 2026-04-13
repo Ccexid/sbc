@@ -7,11 +7,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import me.link.bootstrap.shared.kernel.annotation.OperationLog;
-import me.link.bootstrap.shared.kernel.constants.GlobalConstants;
+import me.link.bootstrap.shared.kernel.constant.GlobalConstants;
 import me.link.bootstrap.shared.kernel.enums.OperationEnum;
 import me.link.bootstrap.shared.kernel.pojo.SortablePageParam;
 import me.link.bootstrap.modules.system.application.dto.vo.TenantExpiryRespVO;
-import me.link.bootstrap.modules.system.infrastructure.persistence.po.TenantDO;
+import me.link.bootstrap.modules.system.infrastructure.persistence.po.TenantPO;
 import me.link.bootstrap.modules.system.application.service.TenantService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -35,7 +35,7 @@ public class TenantController {
             @Parameter(name = "sort", description = "排序字段")
     })
     @OperationLog(module = "租户接口", operation = OperationEnum.VIEWED, description = "查询列表")
-    public ResponseEntity<IPage<TenantDO>> page(@Valid SortablePageParam param) {
+    public ResponseEntity<IPage<TenantPO>> page(@Valid SortablePageParam param) {
         return ResponseEntity.ok(tenantService.searchByPage(param));
     }
 

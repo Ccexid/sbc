@@ -1,8 +1,11 @@
-package me.link.bootstrap.shared.utils;
+package me.link.bootstrap.shared.util;
 
 import cn.hutool.core.util.IdUtil;
 import com.alibaba.ttl.TransmittableThreadLocal;
 import org.slf4j.MDC;
+
+import static me.link.bootstrap.shared.kernel.constant.GlobalConstants.TRACE_ID_KEY;
+import static me.link.bootstrap.shared.kernel.constant.GlobalConstants.TRACE_ID_PREFIX;
 
 /**
  * 链路追踪工具类（UUID 高性能版）
@@ -11,7 +14,7 @@ import org.slf4j.MDC;
  * 相比于序列号方案，去除了锁竞争和时间格式化，具有更高的并发吞吐量。
  * </p>
  */
-public class TraceUtils {
+public class TraceUtil {
 
     /**
      * 基于 TTL 的上下文持有者，确保 TraceId 在线程池中能够正确传递

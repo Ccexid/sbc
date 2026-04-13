@@ -3,7 +3,7 @@ package me.link.bootstrap.shared.infrastructure.mybatis.handler;
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import lombok.extern.slf4j.Slf4j;
 import me.link.bootstrap.shared.infrastructure.mybatis.domain.BaseDO;
-import me.link.bootstrap.shared.utils.SystemClockUtils;
+import me.link.bootstrap.shared.util.SystemClockUtil;
 import org.apache.ibatis.reflection.MetaObject;
 import org.springframework.stereotype.Component;
 
@@ -26,7 +26,7 @@ public class DefaultDBFieldHandler implements MetaObjectHandler {
      */
     @Override
     public void insertFill(MetaObject metaObject) {
-        LocalDateTime current = SystemClockUtils.localDateTime();
+        LocalDateTime current = SystemClockUtil.localDateTime();
         // 处理基础领域对象的时间字段
         if (metaObject.getOriginalObject() instanceof BaseDO baseDO) {
             // 创建时间为空，则以当前时间为插入时间
@@ -48,7 +48,7 @@ public class DefaultDBFieldHandler implements MetaObjectHandler {
      */
     @Override
     public void updateFill(MetaObject metaObject) {
-        LocalDateTime current = SystemClockUtils.localDateTime();
+        LocalDateTime current = SystemClockUtil.localDateTime();
 
         // 若对象继承自 BaseDO，自动填充更新时间
         if (metaObject.getOriginalObject() instanceof BaseDO baseDO) {

@@ -1,4 +1,4 @@
-package me.link.bootstrap.shared.utils.audit;
+package me.link.bootstrap.shared.util.audit;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

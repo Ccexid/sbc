@@ -1,4 +1,4 @@
-package me.link.bootstrap.shared.utils;
+package me.link.bootstrap.shared.util;
 
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -22,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Features concurrent caching with bounded size to prevent memory leaks.
  */
 @Slf4j
-public final class SpelUtils {
+public final class SpelUtil {
 
     private static final ExpressionParser EXPRESSION_PARSER = new SpelExpressionParser();
     private static final ParameterNameDiscoverer PARAMETER_NAME_DISCOVERER = new DefaultParameterNameDiscoverer();
@@ -40,7 +40,7 @@ public final class SpelUtils {
      */
     private static final int MAX_CACHE_SIZE = 512;
 
-    private SpelUtils() {
+    private SpelUtil() {
         // Utility class
     }
 

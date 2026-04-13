@@ -1,9 +1,9 @@
 package me.link.bootstrap.modules.system.infrastructure.persistence.mapper;
 
 import me.link.bootstrap.shared.infrastructure.mybatis.mapper.BaseMapperX;
-import me.link.bootstrap.modules.system.infrastructure.persistence.po.RoleMenuDO;
+import me.link.bootstrap.modules.system.infrastructure.persistence.po.RoleMenuPO;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
-public interface RoleMenuMapper extends BaseMapperX<RoleMenuDO> {
+public interface RoleMenuMapper extends BaseMapperX<RoleMenuPO> {
 }

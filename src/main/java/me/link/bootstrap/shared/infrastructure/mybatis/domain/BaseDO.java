@@ -13,7 +13,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
-import static me.link.bootstrap.shared.kernel.constants.GlobalConstants.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
+import static me.link.bootstrap.shared.kernel.constant.GlobalConstants.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
 @Data
 public abstract class BaseDO implements Serializable {

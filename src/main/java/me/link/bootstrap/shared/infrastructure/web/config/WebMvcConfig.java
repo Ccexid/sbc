@@ -1,6 +1,6 @@
 package me.link.bootstrap.shared.infrastructure.web.config;
 
-import me.link.bootstrap.shared.kernel.constants.GlobalConstants;
+import me.link.bootstrap.shared.kernel.constant.GlobalConstants;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;

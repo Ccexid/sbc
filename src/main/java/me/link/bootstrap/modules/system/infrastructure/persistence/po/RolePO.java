@@ -18,7 +18,7 @@ import java.util.Set;
 @ToString(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class RoleDO extends TenantBasePO {
+public class RolePO extends TenantBasePO {
 
     @TableId(type = IdType.ASSIGN_ID)
     private Long id;

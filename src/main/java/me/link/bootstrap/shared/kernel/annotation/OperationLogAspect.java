@@ -3,9 +3,9 @@ package me.link.bootstrap.shared.kernel.annotation;
 import cn.hutool.core.util.ObjectUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.link.bootstrap.shared.utils.SpelUtils;
-import me.link.bootstrap.shared.utils.SystemClockUtils;
-import me.link.bootstrap.shared.utils.TraceUtils;
+import me.link.bootstrap.shared.util.SpelUtil;
+import me.link.bootstrap.shared.util.SystemClockUtil;
+import me.link.bootstrap.shared.util.TraceUtil;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -29,9 +29,9 @@ public class OperationLogAspect {
 
     @Around("@annotation(operationLog)")
     public Object doAround(ProceedingJoinPoint joinPoint, OperationLog operationLog) throws Throwable {
-        String traceId = TraceUtils.get();
+        String traceId = TraceUtil.get();
         log.info("[OperationLogAspect] traceId: {}, method: {}, args: {}", traceId, joinPoint.getSignature(), joinPoint.getArgs());
-        long startNano = SystemClockUtils.now();
+        long startNano = SystemClockUtil.now();
         Long bizId = parseSpel(joinPoint, operationLog.bizId(), null);
 //        Object oldData = captureSnapshot(operationLog, bizId);
         log.info("[OperationLogAspect] traceId: {}, method: {}, args: {}", traceId, joinPoint.getSignature(), bizId);
@@ -41,7 +41,7 @@ public class OperationLogAspect {
     private Long parseSpel(ProceedingJoinPoint joinPoint, String expression, Object result) {
         if (ObjectUtil.isEmpty(expression)) return 0L;
         Map<String, Object> vars = result != null ? Map.of("result", result) : Collections.emptyMap();
-        String val = SpelUtils.parseExpression(joinPoint, expression, vars);
+        String val = SpelUtil.parseExpression(joinPoint, expression, vars);
         return ObjectUtil.isEmpty(val) ? 0L : Long.parseLong(val);
     }
 }

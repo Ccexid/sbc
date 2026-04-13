@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
  */
 @Data
 @TableName("system_sequence")
-public class SequenceDO {
+public class SequencePO {
 
     /**
      * 主键 ID

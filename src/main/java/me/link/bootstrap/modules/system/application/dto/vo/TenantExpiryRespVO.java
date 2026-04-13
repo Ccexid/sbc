@@ -9,7 +9,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
 
-import static me.link.bootstrap.shared.kernel.constants.GlobalConstants.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
+import static me.link.bootstrap.shared.kernel.constant.GlobalConstants.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
 @Data
 @Builder

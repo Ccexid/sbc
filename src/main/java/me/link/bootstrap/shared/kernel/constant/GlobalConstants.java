@@ -1,4 +1,4 @@
-package me.link.bootstrap.shared.kernel.constants;
+package me.link.bootstrap.shared.kernel.constant;
 
 /**
  * 全局 API 常量类

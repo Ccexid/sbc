@@ -4,12 +4,12 @@ import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import me.link.bootstrap.shared.utils.TraceUtils;
+import me.link.bootstrap.shared.util.TraceUtil;
 
 import java.io.IOException;
 import java.util.regex.Pattern;
 
-import static me.link.bootstrap.shared.kernel.constants.GlobalConstants.TRACE_ID_HEADER;
+import static me.link.bootstrap.shared.kernel.constant.GlobalConstants.TRACE_ID_HEADER;
 
 /**
  * 链路追踪过滤器（性能与安全加固版）
@@ -34,9 +34,9 @@ public class TraceFilter implements Filter {
 
             // 1. 合法性检查与上下文初始化
             if (isValidTraceId(traceId)) {
-                TraceUtils.set(traceId);
+                TraceUtil.set(traceId);
             } else {
-                traceId = TraceUtils.create();
+                traceId = TraceUtil.create();
             }
 
             // 2. 响应回显：在执行后续链条前设置，确保在 Response Committed 之前生效
@@ -53,7 +53,7 @@ public class TraceFilter implements Filter {
             throw new ServletException(e);
         } finally {
             // 5. 核心：彻底清理上下文，防止线程池污染及内存泄漏
-            TraceUtils.remove();
+            TraceUtil.remove();
         }
     }
 

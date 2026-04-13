@@ -11,7 +11,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
 
-import static me.link.bootstrap.shared.kernel.constants.GlobalConstants.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
+import static me.link.bootstrap.shared.kernel.constant.GlobalConstants.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
 @TableName(value = "system_users", autoResultMap = true) // 必须开启 autoResultMap 以支持 TypeHandler
 @Data
@@ -19,7 +19,7 @@ import static me.link.bootstrap.shared.kernel.constants.GlobalConstants.FORMAT_Y
 @ToString(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserDO extends TenantBasePO {
+public class UserPO extends TenantBasePO {
 
     /**
      * 用户ID

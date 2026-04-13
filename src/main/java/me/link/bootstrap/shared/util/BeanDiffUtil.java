@@ -1,10 +1,10 @@
-package me.link.bootstrap.shared.utils;
+package me.link.bootstrap.shared.util;
 
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.ReflectUtil;
 import lombok.extern.slf4j.Slf4j;
 import me.link.bootstrap.shared.kernel.annotation.LogField;
-import me.link.bootstrap.shared.utils.audit.FieldChange;
+import me.link.bootstrap.shared.util.audit.FieldChange;
 import org.springframework.util.ClassUtils;
 
 import java.lang.reflect.Field;
@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * 解决缓存抖动、日志堆栈丢失及格式化性能问题。
  */
 @Slf4j
-public final class BeanDiffUtils {
+public final class BeanDiffUtil {
 
     /**
      * 线程安全的字段反射缓存映射表。
@@ -32,7 +32,7 @@ public final class BeanDiffUtils {
      */
     private static final int MAX_VAL_LENGTH = 500;
 
-    private BeanDiffUtils() {
+    private BeanDiffUtil() {
     }
 
     /**
@@ -110,7 +110,7 @@ public final class BeanDiffUtils {
     private static List<Field> getCachedFields(Class<?> clazz) {
         // 直接利用 computeIfAbsent 的原子性，简化逻辑并避免并发竞态
         // ConcurrentHashMap 在 JDK 8+ 中对 computeIfAbsent 有高度优化
-        return FIELD_CACHE.computeIfAbsent(clazz, BeanDiffUtils::findLogFields);
+        return FIELD_CACHE.computeIfAbsent(clazz, BeanDiffUtil::findLogFields);
     }
 
     /**

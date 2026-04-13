@@ -1,11 +1,11 @@
 package me.link.bootstrap.modules.system.infrastructure.persistence.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import me.link.bootstrap.modules.system.infrastructure.persistence.po.SequenceDO;
+import me.link.bootstrap.modules.system.infrastructure.persistence.po.SequencePO;
 import org.apache.ibatis.annotations.*;
 
 @Mapper
-public interface SequenceMapper extends BaseMapper<SequenceDO> {
+public interface SequenceMapper extends BaseMapper<SequencePO> {
     /**
      * 原子递增序列值 (核心容灾逻辑)
      * 1. 如果 name 不存在，则插入一条记录，初始值为 1

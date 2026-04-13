@@ -14,7 +14,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.time.LocalDateTime;
 import java.util.Set;
 
-import static me.link.bootstrap.shared.kernel.constants.GlobalConstants.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
+import static me.link.bootstrap.shared.kernel.constant.GlobalConstants.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
 /**
  * 租户实体对象
@@ -26,7 +26,7 @@ import static me.link.bootstrap.shared.kernel.constants.GlobalConstants.FORMAT_Y
 @NoArgsConstructor
 @AllArgsConstructor
 @TableName(value = "system_tenant", autoResultMap = true)
-public class TenantDO extends BaseDO {
+public class TenantPO extends BaseDO {
 
     /**
      * 租户编号 (主键 ID)

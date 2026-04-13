@@ -1,4 +1,4 @@
-package me.link.bootstrap.shared.utils;
+package me.link.bootstrap.shared.util;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -17,8 +17,8 @@ import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static me.link.bootstrap.shared.kernel.constants.GlobalConstants.FORMAT_YEAR_MONTH_DAY_COMPACT;
-import static me.link.bootstrap.shared.kernel.constants.GlobalConstants.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND_COMPACT;
+import static me.link.bootstrap.shared.kernel.constant.GlobalConstants.FORMAT_YEAR_MONTH_DAY_COMPACT;
+import static me.link.bootstrap.shared.kernel.constant.GlobalConstants.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND_COMPACT;
 
 /**
  * 分布式ID生成器 - 工业级号段模式
@@ -27,7 +27,7 @@ import static me.link.bootstrap.shared.kernel.constants.GlobalConstants.FORMAT_Y
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class IdUtils {
+public class IdUtil {
 
     private static final long DEFAULT_STEP = 1000;
     private static final String BASE_PREFIX = "id_gen:segment:";
@@ -37,7 +37,7 @@ public class IdUtils {
     private final RedissonClient redissonClient;
     private final SequenceMapper sequenceMapper;
 
-    private static IdUtils instance;
+    private static IdUtil instance;
     private final Map<String, IdSegment> segmentCache = new ConcurrentHashMap<>();
 
     // 专门用于异步加载号段的线程池
@@ -128,7 +128,7 @@ public class IdUtils {
      * @return 生成的ID字符串
      */
     private String generateId(String prefix, int digit, boolean isDaily) {
-        LocalDateTime now = SystemClockUtils.localDateTime();
+        LocalDateTime now = SystemClockUtil.localDateTime();
         String todayStr = now.format(DATE_FORMATTER);
         // 构建业务标识：按天场景附加日期后缀，实现每日独立计数
         String bizName = isDaily ? prefix + ":" + todayStr : prefix;

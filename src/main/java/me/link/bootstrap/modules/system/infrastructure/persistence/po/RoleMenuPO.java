@@ -11,7 +11,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @TableName(value = "system_role_menu", autoResultMap = true)
-public class RoleMenuDO extends TenantBasePO {
+public class RoleMenuPO extends TenantBasePO {
     @TableId(type = IdType.AUTO)
     private Long id;
 

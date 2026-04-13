@@ -1,6 +1,6 @@
 package me.link.bootstrap.shared.infrastructure.thread;
 
-import me.link.bootstrap.shared.utils.TraceUtils;
+import me.link.bootstrap.shared.util.TraceUtil;
 import org.slf4j.MDC;
 import org.springframework.core.task.TaskDecorator;
 import org.springframework.lang.NonNull;
@@ -15,7 +15,7 @@ public class TraceTaskDecorator implements TaskDecorator {
     @NonNull
     public Runnable decorate(@NonNull Runnable runnable) {
         // [主线程] 提取上下文快照
-        String traceId = TraceUtils.get();
+        String traceId = TraceUtil.get();
         Map<String, String> mdcContext = MDC.getCopyOfContextMap();
 
         return () -> {
@@ -32,14 +32,14 @@ public class TraceTaskDecorator implements TaskDecorator {
                 // 2. 确保 TraceId 在 TTL 和 MDC 中一致
                 // 即使 mdcContext 中已有 TraceId，再次调用 set() 可确保 TRACE_HOLDER 也被正确设置
                 if (traceId != null) {
-                    TraceUtils.set(traceId);
+                    TraceUtil.set(traceId);
                 }
 
                 runnable.run();
             } finally {
                 // [子线程] 清理并恢复上下文
                 // 1. 清理当前任务的 Trace 信息
-                TraceUtils.remove();
+                TraceUtil.remove();
                 
                 // 2. 恢复子线程原有的 MDC 上下文，避免污染线程池复用
                 if (originalMdc != null) {

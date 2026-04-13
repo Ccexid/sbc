@@ -11,7 +11,7 @@ import lombok.*;
 @ToString(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserRoleDO extends TenantBasePO {
+public class UserRolePO extends TenantBasePO {
 
     @TableId(type = IdType.AUTO)
     private Long id;

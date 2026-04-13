@@ -17,7 +17,7 @@ import java.util.List;
 @ToString(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrganizationDO extends TenantBasePO {
+public class OrganizationPO extends TenantBasePO {
     /**
      * 主体ID
      */

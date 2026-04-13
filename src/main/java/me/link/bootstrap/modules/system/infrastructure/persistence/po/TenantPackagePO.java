@@ -23,7 +23,7 @@ import java.util.Set;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class TenantPackageDO extends BaseDO {
+public class TenantPackagePO extends BaseDO {
     @Serial
     private static final long serialVersionUID = 1L;
 

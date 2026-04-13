@@ -1,4 +1,4 @@
-package me.link.bootstrap.shared.utils;
+package me.link.bootstrap.shared.util;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * <p>通过内存缓存减少 System.currentTimeMillis() 的系统级调用开销。
  * 针对 Google Java 规范及生产环境资源管理进行了极致优化。
  */
-public final class SystemClockUtils {
+public final class SystemClockUtil {
 
     /** 更新频率（毫秒）。10ms 兼顾了精度与性能。 */
     private static final long UPDATE_PERIOD_MS = 10L;
@@ -42,11 +42,11 @@ public final class SystemClockUtils {
                 TimeUnit.MILLISECONDS);
 
         // 注册 JVM 关闭钩子，确保优雅停机
-        Runtime.getRuntime().addShutdownHook(new Thread(SystemClockUtils::destroy));
+        Runtime.getRuntime().addShutdownHook(new Thread(SystemClockUtil::destroy));
     }
 
     /** 防止实例化。 */
-    private SystemClockUtils() {
+    private SystemClockUtil() {
         throw new UnsupportedOperationException("Utility class");
     }
 
