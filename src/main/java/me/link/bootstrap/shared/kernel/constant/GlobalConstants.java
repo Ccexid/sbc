@@ -60,7 +60,7 @@ public interface GlobalConstants {
     /**
      * 序列号最大长度
      */
-    int MAX_SEQ_LENGTH = 999999;
+    int MAX_ERROR_MSG_LEN = 1000;
 
     /**
      * 日期时间格式化器 - 年月日时分格式

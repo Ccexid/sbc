@@ -19,7 +19,7 @@ public @interface OperationLog {
     OperationEnum operation() default OperationEnum.OTHER;
 
     /**
-     * 日志描述
+     * 日志描述 （支持 SpEL）
      */
     String description() default "";
 
@@ -31,7 +31,7 @@ public @interface OperationLog {
     /**
      * 查询数据的 Service Bean 名称 (用于执行前后的数据对比)
      */
-    String serviceName() default "";
+    String repository() default "";
 
     /**
      * 是否记录详细字段变更 (Diff)
