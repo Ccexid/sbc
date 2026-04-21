@@ -83,6 +83,16 @@ public class OperationLogAspect {
         }
     }
 
+    /**
+     * 构建格式化的错误消息
+     * <p>
+     * 将异常类型和消息组合成可读的错误描述，并在超过最大长度时进行截断处理，
+     * 避免过长的错误信息影响日志存储和展示。
+     * </p>
+     *
+     * @param e 异常对象
+     * @return 格式化的错误消息字符串，如果异常为null则返回null
+     */
     private String buildErrorMessage(Throwable e) {
         if (e == null) return null;
         String msg = e.getClass().getSimpleName() + ": " + e.getMessage();
