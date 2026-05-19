@@ -14,6 +14,6 @@ public class DemoController {
     @GetMapping
     public ResultResponse<Void> demo() {
         log.info("DemoController.demo()");
-        return ResultResponse.success(null);
+        return ResultResponse.success();
     }
 }
