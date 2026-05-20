@@ -7,6 +7,8 @@ import org.apache.ibatis.reflection.MetaObject;
 
 import java.time.LocalDateTime;
 
+import static me.link.bootstrap.shared.kernel.constant.GlobalConstants.*;
+
 /**
  * 默认数据库公共字段自动填充处理器
  * <p>
@@ -18,12 +20,6 @@ import java.time.LocalDateTime;
  */
 @Slf4j
 public class LinkDefaultDBFieldHandler implements MetaObjectHandler {
-
-    private static final String CREATE_TIME = "createTime";
-    private static final String UPDATE_TIME = "updateTime";
-    private static final String CREATOR = "creator";
-    private static final String UPDATER = "updater";
-    private static final String SYSTEM_USER = "SYSTEM";
 
     /**
      * 插入操作时的字段填充逻辑
