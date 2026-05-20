@@ -6,49 +6,71 @@
 src/
 ├── main/
 │   ├── java/me/link/bootstrap/
-│   │   ├── application/
-│   │   │   ├── dto/                # CQRS 架构下的 Command/Query DTO
-│   │   │   └── service/            # 应用服务，负责编排领域模型、事务控制、发送通知
-│   │   ├── domain/
-│   │   │   ├── aggregate/          # 聚合根
-│   │   │   ├── entity/             # 领域实体（纯业务逻辑，无数据库注解）
-│   │   │   ├── event/              # 领域事件（如 LinkCreatedEvent）
-│   │   │   ├── factory/            # 复杂领域对象的创建工厂
-│   │   │   ├── repository/         # 仓储接口（注意：这里只有接口定义！）
-│   │   │   ├── service/            # 领域服务（处理跨实体的核心业务逻辑）
-│   │   │   └── valueobject/        # 值对象
-│   │   ├── infrastructure/
-│   │   │   ├── config/             # 配置类
-│   │   │   ├── messaging/          # 消息队列发送端的实现（实现应用层或领域层的投递接口）
-│   │   │   ├── persistence/        # 持久化层
-│   │   │   │   ├── converter/      # PO 与 Entity 之间的双向转换器
-│   │   │   │   ├── po/             # 改变：将 entity 改为 po，避免与 domain 冲突
-│   │   │   │   └── repository/     # 仓储接口的实现类（如 MyBatis Mapper 或 JPA Repository）
+│   │   /* ==================== 1. CORE BUSINESS LAYERS (核心业务四层) ==================== */
+│   │   ├── interfaces/                     // 用户接口层：只负责协议转换、参数校验、分发
+│   │   │   ├── assembler/                  // DTO 与 Domain Entity 的双向转换器
+│   │   │   ├── controller/                 // 暴露的 RESTful 接口
+│   │   │   └── dto/                        // 接口层的契约数据对象
+│   │   │       ├── request/                // 接收参数（如 SortablePageRequest）
+│   │   │       └── response/               // 返回参数（如 ResultResponse）
+│   │   │
+│   │   ├── application/                    // 应用层：编排领域服务、处理事务、安全检查
+│   │   │   ├── dto/                        // 应用层内部流转的命令对象 (Command/Query)
+│   │   │   └── service/                    // 应用服务实现
+│   │   │
+│   │   ├── domain/                         // 领域层：纯净的业务核心，绝不依赖具体的数据库/技术
+│   │   │   ├── aggregate/                  // 聚合根
+│   │   │   ├── entity/                     // 领域实体
+│   │   │   ├── event/                      // 领域事件定义
+│   │   │   ├── factory/                    // 复杂实体的构建工厂
+│   │   │   ├── repository/                 // 仓储接口（注意：这里只有接口声明！）
+│   │   │   ├── service/                    // 无法归属于单一实体的领域服务流
+│   │   │   └── valueobject/                // 领域值对象
+│   │   │
+│   │   ├── infrastructure/                 // 基础设施层：为上面三层提供技术实现支撑
+│   │   │   ├── adapter/                    // 外部三方服务调用适配（如 RPC、短信）
+│   │   │   ├── exception/                  // 💡 调整：全局异常拦截（@RestControllerAdvice）移至此处
+│   │   │   ├── messaging/                  // 消息队列生产者/消费者实现
+│   │   │   └── persistence/                // 数据库持久化
+│   │   │       ├── converter/              // DO 与 Entity 的 MapStruct 转换
+│   │   │       ├── mapper/                 // 💡 显式增加：MyBatis-Plus 的 Mapper 接口
+│   │   │       ├── po/                     // 数据库持久化对象 (Persistent Object)
+│   │   │       └── repository/             // 仓储实现类（如 LinkRepositoryImpl，实现 domain 里的接口）
+│   │   │
+│   │   /* ==================== 2. TECHNICAL SHARED KERNEL (通用脚手架技术底座) ==================== */
+│   │   ├── shared/kernel/                  // 💡 纯粹的技术内核包（完全无具体业务语义，只提供抽象与基类）
+│   │   │   ├── component/                  // 通用技术组件封装（如分布式布隆过滤器、安全加解密）
+│   │   │   ├── constant/                   // 全局核心技术常量（GlobalConstants）
+│   │   │   ├── converter/                  // MapStruct 的通用基类（BaseConverter）
+│   │   │   ├── exception/                  // 全局错误码定义（ErrorCode、BusinessException 基类）
+│   │   │   ├── valueobject/                // 基础技术值对象（SortingField）
+│   │   │   │
+│   │   │   // 💡 调整：将零散的自动配置和拦截器，按技术组件内聚收拢到此处
+│   │   │   ├── database/mybatis/           
+│   │   │   │   ├── config/
+│   │   │   │   │   └── LinkMybatisAutoConfiguration.java
+│   │   │   │   ├── handler/
+│   │   │   │   │   └── LinkDefaultDBFieldHandler.java
+│   │   │   │   ├── BaseDO.java
+│   │   │   │   └── TenantBaseDO.java
+│   │   │   ├── jackson/
+│   │   │   │   ├── config/
+│   │   │   │   │   └── LinkJacksonAutoConfiguration.java
+│   │   │   │   └── deserializer/
+│   │   │   │       └── XssStringDeserializer.java
+│   │   │   ├── web/
+│   │   │   │   └── config/
+│   │   │   │       ├── LinkCorsAutoConfiguration.java
+│   │   │   │       └── LinkUndertowAutoConfiguration.java
 │   │   │   └── tracing/
+│   │   │       ├── config/
+│   │   │       │   └── LinkTracingAutoConfiguration.java // 建议用自动配置托管
 │   │   │       ├── TraceIdContext.java
 │   │   │       └── TraceIdFilter.java
-│   │   ├── interfaces/             # 用户接口层（所有的输入源）
-│   │   │   ├── assembler/          # DTO 与 Entity 之间的转换
-│   │   │   ├── controller/         # HTTP 接口
-│   │   │   │   └── DemoController.java
-│   │   │   ├── mq/                 # 新增：MQ 消费者/监听器也属于输入源，应放于接口层
-│   │   │   │   └── LinkEventListener.java 
-│   │   │   ├── dto/
-│   │   │   │   ├── request/
-│   │   │   │   └── response/
-│   │   │   │       └── ResultResponse.java
-│   │   │   └── exception/          # 仅存放 GlobalExceptionHandler 等 Web 统一异常拦截
-│   │   ├── shared/                 # 共享内核与基础公共组件
-│   │   │   ├── exception/          # 改变：ErrorCode 和业务异常基类放在这里，供全层级引用
-│   │   │   │   └── ErrorCode.java
-│   │   │   └── component/          # 改变：通用的底层技术组件
-│   │   │       └── BloomRepository.java
-│   │   └── LinkMainApplication.java
+│   │   │
+│   │   └── LinkMainApplication.java        // 启动类
+│   │
 │   └── resources/
-│       ├── META-INF/services/
-│       ├── mapper/
-│       ├── application.yml
-│       ├── logback-spring.xml
-│       ├── schema.sql
-│       └── spy.properties
+│       ├── META-INF/spring/
+│       │   └── org.springframework.boot.autoconfigure.AutoConfiguration.imports // 💡 里面依然托管已经移入 shared 里的配置类
 ```
